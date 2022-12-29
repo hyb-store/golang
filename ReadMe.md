@@ -1,6 +1,6 @@
 [Go官网](https://go.dev/)    [Go语言圣经](https://studygolang.com/book/42)  
 
-
+[API文档](http://doc.golang.ltd/)
 
 ## 一、安装
 
@@ -17,6 +17,10 @@
 | GOPATH   | 工作目录，go项目的工作路径 |
 
 >  命令go env -w GO111MODULE=auto
+
+//默认GoPROXY配置是：GOPROXY=https://proxy.golang.org,direct
+
+>  设置代理go env -w GOPROXY=https://goproxy.cn,direct
 
 ## 二、概述
 
@@ -722,17 +726,1283 @@ func main() {
 	res1 := func (n1 int, n2 int) int {
 		return n1 + n2
 	}(10, 20)
-	fmt.Println("res1=", res1)
+	fmt.Println("res1=", res1)//res1= 30
+}
+```
+
+**匿名函数使用方式 2**
+
+将匿名函数赋给一个变量(函数变量)，再通过该变量来调用匿名函数
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//将匿名函数func (n1 int, n2 int) int赋给 a变量
+	//则a 的数据类型就是函数类型 ，此时,我们可以通过a完成调用
+	a := func (n1 int, n2 int) int {
+		return n1 - n2
+	}
+	res2 := a(10, 30)
+	fmt.Println("res2=", res2)//res2= -20
+	res3 := a(90, 30)
+	fmt.Println("res3=", res3)//res3= 60
+}
+```
+
+**全局匿名函数**
+
+如果将匿名函数赋给一个全局变量，那么这个匿名函数，就成为一个全局匿名函数，可以在程序有效。
+
+```go
+package main
+import (
+	"fmt"
+)
+
+var (
+	//fun1就是一个全局匿名函数
+	Fun1 = func (n1 int, n2 int) int {
+		return n1 * n2
+	}
+)
+
+func main() {
+	//全局匿名函数的使用
+	res4 := Fun1(4, 9)
+	fmt.Println("res4=", res4)//res4= 36
+}
+```
+
+### 6.9 闭包
+
+基本介绍：闭包就是一个函数和与其相关的引用环境组合的一个整体(实体)
+
+**闭包让你可以在一个内层函数中访问到其外层函数的作用域。**
+
+可简单理解为：**有权访问另一个函数作用域内变量的函数都是闭包。**
+
+```go
+package main
+import (
+	"fmt"
+)
+
+//累加器,AddUpper 是一个函数，返回的数据类型是 fun(int)int
+func AddUpper() func (int) int {
+    //返回的是一个匿名函数, 但是这个匿名函数引用到函数外的n,因此这个匿名函数就和n形成一个整体，构成闭包。
+	var n int = 10 
+	return func (x int) int {
+		n = n + x
+		return n
+	}
+}
+
+func main() {
+	f := AddUpper()
+	fmt.Println(f(1))// 11 
+	fmt.Println(f(2))// 13
+	fmt.Println(f(3))// 16
+
+}
+```
+
+#### 6.9.1使用案例
+
+闭包的好处，如果使用传统的方法，也可以轻松实现这个功能，但是传统方法需要每次都传入后缀名，比如 .jpg,而闭包因为可以保留上次引用的某个值，所以我们传入一次就可以反复使用。
+
+以面向对象思想理解闭包，外部整体像一个类，先传入的.jpg 像设置类里的一个public属性，再向返回函数传参像调用类的成员函数，此时成员函数可以调用类里已设置的属性。
+
+```go
+package main
+import (
+	"fmt"
+	"strings"
+)
+
+// 1)编写一个函数 makeSuffix(suffix string)  可以接收一个文件后缀名(比如.jpg)，并返回一个闭包
+// 2)调用闭包，可以传入一个文件名，如果该文件名没有指定的后缀(比如.jpg) ,则返回 文件名.jpg , 如果已经有.jpg后缀，则返回原文件名。
+// 3)使用闭包的方式完成
+// 4)strings.HasSuffix , 该函数可以判断某个字符串是否有指定的后缀。
+
+//返回的匿名函数和 makeSuffix(suffixstring) 的 suffix 变量 组合成一个闭包,因为 返回的函数引用到suffix这个变量
+func makeSuffix(suffix string) func (string) string {
+	return func (name string) string {
+		//如果 name 没有指定后缀，则加上，否则就返回原来的名字
+		if !strings.HasSuffix(name, suffix) {
+			return name + suffix
+		}
+		return name
+	}
+}
+
+func makeSuffix2(suffix string, name string)  string {
+	//如果 name 没有指定后缀，则加上，否则就返回原来的名字
+	if !strings.HasSuffix(name, suffix)  {
+		return name + suffix
+	}
+	return name
+}
+
+func main() {
+	//返回一个闭包
+	f2 := makeSuffix(".jpg") //如果使用闭包完成，好处是只需要传入一次后缀。
+	fmt.Println("文件名处理后=", f2("winter")) // winter.jgp
+	fmt.Println("文件名处理后=", f2("bird.jpg")) // bird.jpg
+
+	fmt.Println("文件名处理后=", makeSuffix2("jpg", "winter")) // winter.jgp
+	fmt.Println("文件名处理后=", makeSuffix2("jpg", "bird.jpg")) // bird.jpg
+}
+```
+
+#### 6.9.2 闭包经典使用场景
+1、return一个内部函数，读取内部函数的变量
+
+2、函数作为参数
+
+3、IIFE（自执行函数）
+
+5、使用回调函数就是在使用闭包
+
+6、将外部函数创建的变量值始终保持在内存中；（会出现内存泄漏）
+
+#### 6.9.3 使用闭包注意点
+因为使用闭包会包含其他函数的作用域，会比其他函数占据更多的内存空间，不会在调用结束之后被垃圾回收机制（简称GC机制）回收，多度使用闭包会过度占用内存，造成内存泄漏。
+
+#### 6.9.4 闭包相关面试题
+1、简述什么是闭包，闭包的作用是什么？写出一个简单的闭包例子。
+
+2、闭包会造成内存泄漏吗？
+
+会，因为使用闭包会包含其他函数的作用域，会比其他函数占据更多的内存空间，不会在调用结束之后被垃圾回收机制回收，多度使用闭包会过度占用内存，造成内存泄漏。
+
+3、for循环和闭包(必刷题)
+
+### 6.10 defer
+
+在函数中，程序员经常需要创建资源(比如：数据库连接、文件句柄、锁等) ，为了在**函数执行完毕后，及时的释放资源**，Go的设计者提供defer(延时机制)。defer 最主要的价值是在，当函数执行完毕后，可以及时的释放函数创建的资源。看下模拟代码。
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func sum(n1 int, n2 int) int {
+	//当执行到defer时，暂时不执行，会将defer后面的语句压入到独立的栈(defer栈)
+	//当函数执行完毕后，再从defer栈，按照先入后出的方式出栈，执行
+	defer fmt.Println("ok1 n1=", n1) //defer 3. ok1 n1 = 10
+	defer fmt.Println("ok2 n2=", n2) //defer 2. ok2 n2= 20
+
+	res := n1 + n2 // res = 30
+	fmt.Println("ok3 res=", res) // 1. ok3 res= 30
+	return res
+}
+
+func main() {
+	res := sum(10, 20)
+	fmt.Println("res=", res)  // 4. res= 30
+}
+//-------结果--------
+ok3 res= 30
+ok2 n2= 20
+ok1 n1 = 10
+res= 30
+```
+
+**注意事项**
+
+1 ) 当go执行到一个defer时，不会立即执行defer后的语句，而是将defer 后的语句压入到一个栈中[我为了讲课方便，暂时称该栈为defer栈],然后继续执行函数下一个语句。
+
+2 ) 当函数执行完毕后，在从defer栈中，依次从栈顶取出语句执行(注：遵守栈 先入后出的机制)，所以同学们看到前面案例输出的顺序。
+
+3 ) 在defer 将语句放入到栈时，也会将相关的值拷贝同时入栈。
+
+**defer使用**
+
+1 ) 在golang编程中的通常做法是，创建资源后，比如(打开了文件，获取了数据库的链接，或者是锁资源)， 可以执行 defer file.Close() defer connect.Close()
+
+2 ) 在defer后，可以继续使用创建资源.
+
+3 ) 当函数完毕后，系统会依次从defer栈中，取出语句，关闭资源.
+
+4 ) 这种机制，非常简洁，程序员不用再为在什么时机关闭资源而烦心。
+### 6.11 函数传递方式
+**传递方式分类**
+
+1 ) 值传递
+
+2 ) 引用传递
+
+其实，不管是值传递还是引用传递，传递给函数的都是变量的副本，不同的是，值传递的是值的拷贝，引用传递的是地址的拷贝，一般来说，地址拷贝效率高，因为数据量小，而值拷贝决定拷贝的数据大小，数据越大，效率越低。
+
+**值类型和引用类型**
+
+1 ) 值类型：基本数据类型 int 系列，float 系列，bool，string ，数组和结构体struct
+
+2 ) 引用类型：指针，slice切片，map，管道chan，interface 等都是引用类型
+
+**特点**
+
+1 ) 值类型默认是值传递:变量直接存储值，内存通常在**栈**中分配。
+
+2 ) 引用类型默认是引用传递：变量存储的是一个地址，这个地址对应的空间才真正存储数据（值），内存通常在**堆**上分配，当没有任何变量引用这个地址时，改地址对应的数据空间就成为一个垃圾，由GC来回收。
+
+3 ) 如果希望函数内的变量能修改函数外的变量，可以传入变量的地址&，函数内以指针的方式操作变量。从效果上看类似引用 。
+
+### 6.12 变量作用域
+1 ) 函数内部声明/定义的变量叫局部变量，作用域仅限于函数内部
+
+2 ) 函数外部声明/定义的变量叫全局变量，作用域在整个包都有效，如果其首字母为大写，则作用域在整个程序有效
+
+3 ) 如果变量是在一个代码块，比如 for/if中，那么这个变量的的作用域就在该代码块
+
+### 6.13 字符串常用系统函数
+1 ) 统计字符串的长度，按字节 len(str)
+
+```go
+func main(){
+    //统计字符串的长度，按字节 len(str)
+	////golang的编码统一为utf-8 (ascii的字符(字母和数字) 占一个字节，汉字占用3个字节)
+	str := "hello北" 
+	fmt.Println("str len=", len(str)) // 8
+}
+```
+
+2 ) 字符串遍历，同时处理有中文的问题 r:=[]rune(str)
+```go
+func main(){
+    str2 := "hello北京"
+	//字符串遍历，同时处理有中文的问题 r := []rune(str)
+	r := []rune(str2)
+	for i := 0; i < len(r); i++ {
+		fmt.Printf("字符=%c\n", r[i])
+	}
+}
+```
+
+3 ) 字符串转整数: n,err:=strconv.Atoi(" 12 ")
+```go
+func main(){
+    //字符串转整数:	 n, err := strconv.Atoi("12")
+	n, err := strconv.Atoi("123")
+	if err != nil {
+		fmt.Println("转换错误", err)
+	}else {
+		fmt.Println("转成的结果是", n)//转成的结果是 123
+	}
+}
+```
+
+4 ) 整数转字符串 str=strconv.Itoa( 12345 )
+```go
+func main(){
+    //整数转字符串  str = strconv.Itoa(12345)
+	str = strconv.Itoa(12345)
+	fmt.Printf("str=%v, str=%T\n", str, str)//str=12345, str=string 
+}
+```
+
+5 ) 字符串 转 []byte: varbytes=[]byte(“hello go”)
+```go
+func main(){
+    //字符串 转 []byte:  var bytes = []byte("hello go")
+	var bytes = []byte("hello go")
+	fmt.Printf("bytes=%v\n", bytes)//bytes=[104 101 108 108 111 32 103 111]
+}
+```
+
+6.) []byte 转 字符串:str=string([]byte{ 97 , 98 , 99 })
+```go
+func main(){
+    //[]byte 转 字符串: str = string([]byte{97, 98, 99})
+	str = string([]byte{97, 98, 99}) 
+	fmt.Printf("str=%v\n", str)//str=abc
+}
+```
+7 ) 10 进制转 2 , 8 , 16.进制: str=strconv.FormatInt( 123 , 2 )// 2 - > 8 , 16
+```go
+func main(){
+    //10进制转 2, 8, 16进制:  str = strconv.FormatInt(123, 2),返回对应的字符串
+	str = strconv.FormatInt(123, 2)
+	fmt.Printf("123对应的二进制是=%v\n", str)//123对应的二进制是=1111011
+	str = strconv.FormatInt(123, 16)
+	fmt.Printf("123对应的16进制是=%v\n", str)//123对应的16进制是=7b
+}
+```
+8 ) 查找子串是否在指定的字符串中:strings.Contains(“seafood”,“foo”)//true
+```go
+func main(){
+    //查找子串是否在指定的字符串中: strings.Contains("seafood", "foo") //true
+	b := strings.Contains("seafood", "mary")
+	fmt.Printf("b=%v\n", b) //b=false
+}
+```
+9 ) 统计一个字符串有几个指定的子串 ： strings.Count(“ceheese”,“e”)// 4
+```go
+func main(){
+    //统计一个字符串有几个指定的子串 ： strings.Count("ceheese", "e") //4
+	num := strings.Count("ceheese", "e")
+	fmt.Printf("num=%v\n", num)//num=4
+}
+```
+10 ) 不区分大小写的字符串比较(==是区分字母大小写的):fmt.Println(strings.EqualFold(“abc”,“Abc”))//true
+```go
+func main(){
+    //不区分大小写的字符串比较(==是区分字母大小写的): fmt.Println(strings.EqualFold("abc", "Abc")) // true
+	b = strings.EqualFold("abc", "Abc")
+	fmt.Printf("b=%v\n", b) //true
+	fmt.Println("结果","abc" == "Abc") // false //区分字母大小写
+}
+```
+11 )返回子串在字符串第一次出现的index值，如果没有返回- 1 :strings.Index(“NLT_abc”,“abc”)// 4
+```go
+func main(){
+    //返回子串在字符串第一次出现的index值，如果没有返回-1 : 
+	//strings.Index("NLT_abc", "abc") // 4
+	index := strings.Index("NLT_abcabcabc", "abc") // 4
+	fmt.Printf("index=%v\n",index)
+}
+```
+12 ) 返回子串在字符串最后一次出现的index，如没有返回- 1 :strings.LastIndex(“gogolang”,“go”)
+```go
+func main(){
+    //返回子串在字符串最后一次出现的index，
+	//如没有返回-1 : strings.LastIndex("go golang", "go")
+
+	index = strings.LastIndex("go golang", "go") //3
+	fmt.Printf("index=%v\n",index)
+
+}
+```
+13 ) 将指定的子串替换成 另外一个子串:strings.Replace(“gogohello”,“go”,“go语言”,n)n可以指定你希望替换几个，如果n=- 1 表示全部替换
+```go
+func main(){
+    //将指定的子串替换成 另外一个子串: strings.Replace("go go hello", "go", "go语言", n) 
+	//n可以指定你希望替换几个，如果n=-1表示全部替换
+
+	str2 = "go go hello"
+	str = strings.Replace(str2, "go", "北京", -1)
+	fmt.Printf("str=%v str2=%v\n", str, str2)//str=北京 北京 hello str2=go go hello
+}
+```
+14 ) 按照指定的某个字符，为分割标识，将一个字符串拆分成字符串数组：strings.Split(“hello,wrold,ok”,“,”)
+```go
+func main(){
+    //按照指定的某个字符，为分割标识，将一个字符串拆分成字符串数组： 
+	//strings.Split("hello,wrold,ok", ",")
+	strArr := strings.Split("hello,wrold,ok", ",")
+	for i := 0; i < len(strArr); i++ {
+		fmt.Printf("str[%v]=%v\n", i, strArr[i])
+	} 
+	fmt.Printf("strArr=%v\n", strArr)//strArr=[hello wrold ok] 
+}
+```
+15 ) 将字符串的字母进行大小写的转换:strings.ToLower(“Go”)//gostrings.ToUpper(“Go”)//GO
+```go
+func main(){
+    //将字符串的字母进行大小写的转换: 
+	//strings.ToLower("Go") // go strings.ToUpper("Go") // GO
+
+	str = "goLang Hello"
+	str = strings.ToLower(str) 
+	str = strings.ToUpper(str) 
+	fmt.Printf("str=%v\n", str) //str=GOLANG HELLO
+}
+```
+16.) 将字符串左右两边的空格去掉： strings.TrimSpace("tnalonegopherntrn ")
+```go
+func main(){
+    //将字符串左右两边的空格去掉： strings.TrimSpace(" tn a lone gopher ntrn   ")
+	str = strings.TrimSpace(" tn a lone gopher ntrn   ")
+	fmt.Printf("str=%q\n", str)//str="tn a lone gopher ntrn"
+}
+```
+17 ) 将字符串左右两边指定的字符去掉 ： strings.Trim(“!hello!”,“!”) //[“hello”]//将左右两边! 和 ""去掉
+
+```go
+func main(){
+    //将字符串左右两边指定的字符去掉 ： 
+	//strings.Trim("! hello! ", " !")  // ["hello"] //将左右两边 ! 和 " "去掉
+	str = strings.Trim("! he!llo! ", " !")
+	fmt.Printf("str=%q\n", str)//str="he!llo"
+}
+```
+18 ) 将字符串左边指定的字符去掉 ： strings.TrimLeft(“!hello!”,“!”) //[“hello”]//将左边! 和 " "去掉
+
+```go
+func main(){
+    str = strings.TrimLeft("! he!llo! ", " !")
+	fmt.Printf("str=%q\n", str)//str="he!llo! "
+}
+```
+19 ) 将字符串右边指定的字符去掉 ：strings.TrimRight(“!hello!”,“!”) //[“hello”]//将右边! 和 " "去掉
+
+```go
+func main(){
+    str = strings.TrimRight("! he!llo! ", " !")
+	fmt.Printf("str=%q\n", str)//str="! he!llo"
+}
+```
+20 ) 判断字符串是否以指定的字符串开头:strings.HasPrefix("ftp:// 192. 168. 10. 1 ",“ftp”)//true
+```go
+func main(){
+    //判断字符串是否以指定的字符串开头: 
+	b = strings.HasPrefix("ftp://192.168.10.1", "hsp") 
+	fmt.Printf("b=%v\n", b)//b=false
+}
+```
+
+21 ) 判断字符串是否以指定的字符串结束:strings.HasSuffix(“NLT_abc.jpg”,“abc”)//false
+
+```go
+func main(){
+    //判断字符串是否以指定的字符串结束
+    b = strings.HasSuffix("ftp://192.168.10.1", "10.1") //true
+	fmt.Printf("b=%v\n", b)
+}
+```
+
+### 6.14 时间和日期相关函数
+1 ) 时间和日期相关函数，需要导入 time包
+
+2 ) time.Time 类型，用于表示时间
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	//看看日期和时间相关函数和方法使用
+	//获取当前时间
+	now := time.Now()
+	fmt.Printf("now=%v now type=%T\n", now, now)
+    //now=2022-12-29 10:55:38.068575 +0800 CST m=+0.012695601 now type=time.Time
+}
+```
+
+3 ) 如何获取到部分的日期信息
+
+```go
+package main
+import (
+	"fmt"
+	"time"
+)
+func main() {
+	//看看日期和时间相关函数和方法使用
+	//1. 获取当前时间
+	now := time.Now()
+	fmt.Printf("now=%v now type=%T\n", now, now)
+    //now=2022-12-29 10:55:38.068575 +0800 CST m=+0.012695601 now type=time.Time
+
+	//2.通过now可以获取到年月日，时分秒
+	fmt.Printf("年=%v\n", now.Year())//年=2022
+	fmt.Printf("月=%v\n", now.Month())//月=December
+	fmt.Printf("月=%v\n", int(now.Month()))//月=12
+	fmt.Printf("日=%v\n", now.Day())//日=29
+	fmt.Printf("时=%v\n", now.Hour())//时=10
+	fmt.Printf("分=%v\n", now.Minute())//分=55
+	fmt.Printf("秒=%v\n", now.Second())//秒=38
+}
+```
+
+4 ) 格式化日期时间
+
+方式 1 : 就是使用Printf 或者 SPrintf
+
+```go
+package main
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+    now := time.Now()
+	//格式化日期时间    
+	fmt.Printf("当前年月日 %d-%d-%d %d:%d:%d \n", now.Year(), 
+	now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())//当前年月日 2022-12-29 10:55:38
+
+    //fmt.Sprintf 来格式化字符串
+	dateStr := fmt.Sprintf("当前年月日 %d-%d-%d %d:%d:%d \n", now.Year(), 
+	now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second())//
+
+	fmt.Printf("dateStr=%v\n", dateStr)//dateStr=当前年月日 2022-12-29 10:55:38
+}
+```
+
+方式二: 使用 time.Format() 方法完成:
+
+```go
+package main
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+    now := time.Now()
+	//格式化日期时间的第二种方式
+	fmt.Printf(now.Format("2006-01-02 15:04:05"))//2022-12-29 10:55:38
+	fmt.Println()
+	fmt.Printf(now.Format("2006-01-02"))//2022-12-29
+	fmt.Println()
+	fmt.Printf(now.Format("15:04:05"))//10:55:38
+	fmt.Println()
+	fmt.Printf(now.Format("2006"))//2022
+	fmt.Println()
+}
+```
+
+5 ) 时间的常量
+
+```go
+const(
+     Nanosecond Duration= 1 //纳秒
+     Microsecond = 1000 *Nanosecond //微秒
+     Millisecond = 1000 *Microsecond//毫秒
+     Second = 1000 *Millisecond//秒
+     Minute = 60 *Second//分钟
+     Hour = 60 *Minute//小时
+)
+```
+
+常量的作用:**在程序中可用于获取指定时间单位的时间，比如想得到 100 毫秒**
+
+```go
+100 *time.Millisecond
+```
+
+6 ) 使用Sleep测量时间
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	i := 0
+	for {
+		i++
+		fmt.Println(i)
+		//休眠
+		//time.Sleep(time.Second)//每隔1秒中打印一个数字，打印到100时就退出
+		time.Sleep(time.Millisecond * 100)//每隔0.1秒中打印一个数字，打印到100时就退出
+		if i == 100 {
+			break
+		}
+	}
+}
+```
+
+7 ) time的Unix和UnixNano的方法
+
+![image-20221229111046694](imag/image-20221229111046694.png)
+
+```go
+package main
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	// 获取当前时间
+	now := time.Now()
+	//Unix和UnixNano的使用
+	fmt.Printf("unix时间戳=%v unixnano时间戳=%v\n", now.Unix(), now.UnixNano())
+    //unix时间戳=1672282538 unixnano时间戳=1672282538068575000
+}
+```
+
+可以用来统计时间
+
+```go
+package main
+import (
+	"fmt"
+	"time"
+	"strconv"
+)
+
+func test() {
+	str := ""
+	for i := 0; i < 100000; i++ {
+		str += "hello" + strconv.Itoa(i)
+	}
+}
+
+func main() {
+	//在执行test前，先获取到当前的unix时间戳
+	start := time.Now().Unix()
+	test()
+	end := time.Now().Unix()
+	fmt.Printf("执行test()耗费时间为%v秒\n", end-start)//执行test()耗费时间为7秒
+}
+```
+
+### 6.15 系统函数(内置函数builtin)
+
+1 ) len：用来求长度，比如string、array、slice、map、channel
+
+2 ) new：用来分配内存，主要用来分配值类型，比如int、float 32 ,struct返回的是指针
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	num1 := 100
+	fmt.Printf("num1的类型%T , num1的值=%v , num1的地址%v\n", num1, num1, &num1)
+    //num1的类型int , num1的值=100 , num1的地址0xc0000140c8
+    
+	num2 := new(int) // *int
+	//num2的值 = 地址 0xc000014100 （这个地址是系统分配）
+	//num2的地址%v = 地址 0xc000006030  (这个地址是系统分配)
+	*num2  = 100
+	fmt.Printf("num2的类型%T , num2的值=%v , num2的地址%v\n num2这个指针，指向的值=%v", 
+		num2, num2, &num2, *num2)
+    //num2的类型*int , num2的值=0xc000014100 , num2的地址0xc000006030  num2这个指针，指向的值=100
+}
+```
+
+![image-20221229120441856](imag/image-20221229120441856.png)
+
+3 ) make：用来分配内存，主要用来分配引用类型，比如channel、map、slice。
+
+### 6.16 错误处理
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func test() {
+	num1 := 10
+	num2 := 0
+	res := num1 / num2
+	fmt.Println("res=", res)
+}
+
+func main() {
+	test()
+	fmt.Println("main()下面的代码...")
+}
+//结果
+//panic: runtime error: integer divide by zero
+```
+
+1 ) 在默认情况下，当发生错误后(panic)，程序就会退出（崩溃）
+
+2 ) 如果我们希望：当发生错误后，可以捕获到错误，并进行处理，保证程序可以继续执行。还可以在捕获到错误后，给管理员一个提示(邮件,短信。。。）
+
+**基本说明**
+
+1 ) Go语言追求简洁优雅，所以，Go语言不支持传统的 `try-catch-finally` 这种处理。
+
+2 ) Go中引入的处理方式为： defer , panic , recover
+
+3 ) 这几个异常的使用场景可以这么简单描述：Go中可以抛出一个panic的异常，然后在defer中通过**recover捕获这个异常**，然后正常处理
+
+```go
+package main
+import (
+	"fmt"
+	"time"
+)
+
+func test() {
+	//使用defer + recover 来捕获和处理异常
+	defer func() {
+		err := recover()  // recover()内置函数，可以捕获到异常
+		if err != nil {  // 说明捕获到错误
+			fmt.Println("err=", err)
+		}
+	}()
+	num1 := 10
+	num2 := 0
+	res := num1 / num2
+	fmt.Println("res=", res)
+}
+
+func main() {
+	test()
+	for {
+		fmt.Println("main()下面的代码...")
+		time.Sleep(time.Second)
+	}
+}
+/*结果
+err= runtime error: integer divide by zero
+发送邮件给admin@sohu.com~
+main()下面的代码...
+*/
+```
+
+**自定义错误**
+
+Go程序中，也支持自定义错误， 使用errors.New 和 panic 内置函数。
+
+1 ) errors.New(“错误说明”), 会返回一个error类型的值，表示一个错误
+
+2 ) panic内置函数 ,接收一个interface{}类型的值（也就是任何值了）作为参数。可以接收error类型的变量，输出错误信息，并退出程序.
+
+```go
+package main
+import (
+	"fmt"
+	_ "time"
+	"errors"
+)
+//函数去读取以配置文件init.conf的信息
+//如果文件名传入不正确，我们就返回一个自定义的错误
+func readConf(name string) (err error) {
+	if name == "config.ini" {
+		//读取...
+		return nil
+	} else {
+		//返回一个自定义错误
+		return errors.New("读取文件错误..")
+	}
+}
+
+func test02() {
+	err := readConf("config2.ini")
+	if err != nil {
+		//如果读取文件发送错误，就输出这个错误，并终止程序
+		panic(err)
+	}
+	fmt.Println("test02()继续执行....")
+}
+	
+func main() {
+	test02()
+	fmt.Println("main()下面的代码...")
+}
+//--------------------------------
+//正确输出
+test02()继续执行....
+main()下面的代码...
+
+//错误输出
+panic: 读取文件错误..                                             
+                                                                  
+goroutine 1 [running]:                                            
+main.test02()                                                     
+        E:/goprojects/src/go_code/chapter06/error/main.go:42 +0x49
+main.main()                                                       
+        E:/goprojects/src/go_code/chapter06/error/main.go:58 +0x19
+
+```
+
+
+
+## 七、数组与切片
+
+数组可以存放多个同一类型数据。数组也是一种数据类型，在Go中，数组是值类型。
+
+### 7.1 数组的定义
+
+```go
+var 数组名 [数组大小]数据类型
+var a [5]int// 数组名 [长度]数据类型
+赋初值 a[0]= 1 a[1]= 30 
+```
+
+### 7.2 数组内存布局,地址连续
+
+![image-20221229142357572](imag/image-20221229142357572.png)
+
+1 ) 数组的地址可以通过数组名来获取 &intArr
+
+2 ) 数组的第一个元素的地址，就是数组的首地址
+
+3 ) 数组的各个元素的地址间隔是依据数组的类型决定，比如int 64 - > 8， int 32 - > 4
+
+### 7.3 初始化数组的方式
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//初始化数组的方式
+	var numArr01 [3]int = [3]int{1, 2, 3}
+	fmt.Println("numArr01=", numArr01)
+
+	var numArr02 = [3]int{5, 6, 7}
+	fmt.Println("numArr02=", numArr02)
+    
+	//这里的 [...] 是规定的写法由go推导数组大小
+	var numArr03 = [...]int{8, 9, 10}
+	fmt.Println("numArr03=", numArr03)
+
+	var numArr04 = [...]int{1: 800, 0: 900, 2:999}
+	fmt.Println("numArr04=", numArr04)//numArr04= [900 800 999]
+    
+    f := [...] int{0: 1, 4: 1, 9: 1} // [1 0 0 0 1 0 0 0 0 1]
+  	fmt.Println(f)
+
+    e := [5] int{4: 100} // [0 0 0 0 100]
+    fmt.Println(e)
+    
+    //类型推导:=
+	strArr05 := [...]string{1: "tom", 0: "jack", 2:"mary"}
+	fmt.Println("strArr05=", strArr05)//strArr05= [jack tom mary]
+}
+```
+
+### 7.4 数组遍历
+
+1）方式1：for（；；；）遍历数组
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	//for-range遍历数组
+	heroes := [...]string{"宋江", "吴用", "卢俊义"}
+
+	for i := 0; i < len(heroes); i++ {
+		fmt.Printf("i=%v v=%v\n", i, heroes[i]) //i=0 v=宋江
+	}
+}
+```
+
+2）方式2：for-range结构遍历
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	//for-range遍历数组
+	heroes := [...]string{"宋江", "吴用", "卢俊义"}
+
+	for i, v := range heroes {//index和value的名称不是固定的。可以自己改变
+		fmt.Printf("i=%v v=%v\n", i, v) //i=0 v=宋江
+		fmt.Printf("heroes[%d]=%v\n", i, heroes[i])  //heroes[0]=宋江
+	}
+
+	for _, v := range heroes { 
+		fmt.Printf("元素的值=%v\n", v) //元素的值=宋江
+	}
+}
+```
+
+### 7.5 数组使用注意事项
+1 ) 数组是多个相同类型数据的组合，一个数组一旦声明/定义了，其长度是固定的，不能动态变化。否则报越界
+
+2 ) 数组中的元素可以是任何数据类型，包括值类型和引用类型，但是不能混用。
+
+3 ) 数组创建后，如果没有赋值，有默认值(零值)
+
+- 数值类型数组：默认值为 0
+- 字符串数组： 默认值为 “”
+- bool数组： 默认值为 false
+
+5 ) 使用数组的步骤:
+
+- 1.声明数组并开辟空间 
+- 2.给数组各个元素赋值(默认零值) 
+- 3.使用数组
+
+6 ) Go的数组属值类型，在默认情况下是值传递，因此会进行值拷贝。数组间不会相互影响
+
+7 ) 如想在其它函数中，去修改原来的数组，可以使用引用传递(指针方式)
+
+```go
+package main
+import (
+	"fmt"
+)
+
+//函数
+func test02(arr *[3]int) {
+	fmt.Printf("arr指针的地址=%p", &arr)//arr指针的地址=0xc000006030
+	(*arr)[0] = 88 //!!
+} 
+
+
+func main() {	
+	arr := [3]int{11, 22, 33}
+	fmt.Printf("arr 的地址=%p", &arr)//arr 的地址=0xc00000c150
+	test02(&arr)
+	fmt.Println("main arr=", arr)//arr= [88 22 33]
+}	
+```
+
+8 ) 长度是数组类型的一部分，在传递函数参数时需要考虑数组的长度
+
+```go
+/题1
+package main
+import (
+	"fmt"
+)
+
+//默认值拷贝
+func modify(arr []int) {
+	arr[0] = 100
+    fmt.Println("modify的arr",arr)
+} 
+
+func main() {	
+	var arr = [...]int{1,2,3}
+	modify(arr)
+}	
+//编译错误，因为不能把[3]int 传递给[]int
+```
+
+```go
+//题2
+package main
+import (
+	"fmt"
+)
+
+//默认值拷贝
+func modify(arr [4]int) {
+	arr[0] = 100
+    fmt.Println("modify的arr",arr)
+} 
+
+func main() {	
+	var arr = [...]int{1,2,3}
+	modify(arr)
+}	
+//编译错误，因为不能把[3]int 传递给[4]int
+```
+
+### 7.6 切片的定义
+1 ) 切片的英文是slice
+
+2 ) 切片是数组的一个引用，因此切片是**引用类型**，在进行传递时，遵守引用传递的机制。
+
+3 ) 切片的**使用和数组类似**，遍历切片、访问切片的元素和求切片长度len(slice)都一样。
+
+4 ) 切片的长度是可以变化的，因此切片是一个可以**动态变化数组**。
+
+5 ) 切片定义的基本语法:
+
+```go
+var 切片名 []类型
+//比如：vara[]int
+```
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//演示切片的基本使用
+	var intArr [5]int = [...]int{1, 22, 33, 66, 99}
+	//声明/定义一个切片
+	//1. slice 就是切片名
+	//2. intArr[1:3] 表示 slice 引用到intArr这个数组 
+	//3. 引用intArr数组的起始下标为 1 , 最后的下标为3(但是不包含3)    
+	slice := intArr[1:3] 
+	fmt.Println("intArr=", intArr) //[1 22 33 66 99]
+	fmt.Println("slice 的元素是 =", slice) //  22, 33
+	fmt.Println("slice 的元素个数 =", len(slice)) // 2
+	fmt.Println("slice 的容量 =", cap(slice)) //4 切片的容量是可以动态变化  
 }
 ```
 
 
 
-## 八、排序和查找
+## 八、排序与查找
 
 
 
 ## 九、map
+
+### 9.1 map概述
+- map是key-value数据结构，又称为字段或者关联数组。类似其它编程语言的集合，在编程中是经常使用到
+
+- 基本语法
+
+> var map 变量名 map[keytype]valuetype
+
+- golang中的map的 key 可以是很多种类型，比如 bool, 数字，string，指针，channel，还可以是只包含前面几个类型的接口，结构体， 数组。通常 key 为 int，string。**注意:**slice，map还有function不可以，因为这几个没法用 ==来判断
+
+- valuetype的类型和key基本一样。通常为: 数字(整数，浮点数)，string，map，struct
+
+### 9.2 map声明
+map声明：
+
+```go
+var a map[string]string
+var a map[string]int
+var a map[int]string
+var a map[string]map[string]string
+```
+
+**声明是不会分配内存的，初始化需要make ，分配内存后才能赋值和使用。**
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//map的声明和注意事项 
+	var a map[string]string
+	//在使用map前，需要先make , make的作用就是给map分配数据空间
+	a = make(map[string]string, 10)
+	a["no1"] = "宋江" 
+	a["no2"] = "吴用" 
+	a["no1"] = "武松" 
+	a["no3"] = "吴用" 
+	fmt.Println(a)//map[no1:武松 no2:吴用 no3:吴用]
+}
+```
+
+1 ) map在使用前一定要make
+
+2 ) map的key是不能重复，如果重复了，则以最后这个key-value为准
+
+3 ) map的value是可以相同的.
+
+4 ) map的 key-value是无序
+
+5 ) make内置函数数目
+
+![image-20221229151531480](imag/image-20221229151531480.png)
+
+## 9.3 map的使用
+
+方式 1
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//第一种使用方式
+	var a map[string]string
+	//在使用map前，需要先make , make的作用就是给map分配数据空间
+	a = make(map[string]string, 10)
+	a["no1"] = "宋江" //ok?
+	a["no2"] = "吴用" //ok?
+	a["no1"] = "武松" //ok?
+	a["no3"] = "吴用" //ok?
+	fmt.Println(a)
+
+}
+```
+
+方式 2
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//第二种方式
+	cities := make(map[string]string)
+	cities["no1"] = "北京"
+	cities["no2"] = "天津"
+	cities["no3"] = "上海"
+	fmt.Println(cities)
+}
+```
+
+方式 3
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//第三种方式
+	heroes := map[string]string{
+		"hero1" : "宋江",
+		"hero2" : "卢俊义",
+		"hero3" : "吴用",
+	}
+	heroes["hero4"] = "林冲"
+	fmt.Println("heroes=", heroes)
+}
+```
+
+9.4 map操作
+
+- map增改
+
+  ```go
+  map[“key”]=value//如果 key 还没有，就是增加，如果 key 存在就是修改。
+  ```
+
+- map删除：
+  说明：delete(map，“key”) ，delete是一个内置函数，如果key存在，就删除该key-value,如果key不存在，不操作，但是也不会报错
+
+![image-20221229152017254](imag/image-20221229152017254.png)
+
+
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//第二种方式
+	cities := make(map[string]string)
+	cities["no1"] = "北京"
+	cities["no2"] = "天津"
+	cities["no3"] = "上海"
+	fmt.Println(cities) // map[no1:北京 no2:天津 no3:上海]
+
+	//删除
+	delete(cities, "no1")
+	fmt.Println(cities) // map[no2:天津 no3:上海]
+	//当delete指定的key不存在时，删除不会操作，也不会报错
+	delete(cities, "no4") 
+	fmt.Println(cities) // map[no2:天津 no3:上海]
+}	
+```
+
+如果我们要删除map的**所有key**,没有一个专门的方法一次删除，可以遍历一下key，逐个删除或者 **map=make(…)，make一个新的，让原来的成为垃圾，被gc回收**
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//第二种方式
+	cities := make(map[string]string)
+	cities["no1"] = "北京"
+	cities["no2"] = "天津"
+	cities["no3"] = "上海"
+	fmt.Println(cities)
+
+	//如果希望一次性删除所有的key
+	//1. 遍历所有的key,如何逐一删除 [遍历]
+	//2. 直接make一个新的空间
+	cities = make(map[string]string)
+	fmt.Println(cities)
+}
+
+```
+
+- map 查找
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//第二种方式
+	cities := make(map[string]string)
+	cities["no1"] = "北京"
+	cities["no2"] = "天津"
+	cities["no3"] = "上海"
+	fmt.Println(cities)
+
+	//演示map的查找
+	val, ok := cities["no2"]
+	if ok {
+		fmt.Printf("有no1 key 值为%v\n", val)//有no1 key 值为天津
+	} else {
+		fmt.Printf("没有no1 key\n")
+	}
+}
+```
+
+- map遍历
+
+map的遍历使用 **for-range** 的结构遍历
+
+map的长度：len()
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+	//使用for-range遍历map
+	//第二种方式
+	cities := make(map[string]string)
+	cities["no1"] = "北京"
+	cities["no2"] = "天津"
+	cities["no3"] = "上海"
+	
+	for k, v := range cities {
+		fmt.Printf("k=%v v=%v\n", k, v)  //k=no1 v=北京
+	}
+
+	fmt.Println("cities 有", len(cities), " 对 key-value") //cities 有 3  对 key-value
+
+	//使用for-range遍历一个结构比较复杂的map
+	studentmap := make(map[string]map[string]string)
+	
+	studentmap["stu01"] =  make(map[string]string, 3)
+	studentmap["stu01"]["name"] = "tom"
+	studentmap["stu01"]["sex"] = "男"
+	studentmap["stu01"]["address"] = "北京长安街~"
+
+	studentmap["stu02"] =  make(map[string]string, 3) //这句话不能少!!
+	studentmap["stu02"]["name"] = "mary"
+	studentmap["stu02"]["sex"] = "女"
+	studentmap["stu02"]["address"] = "上海黄浦江~"
+
+    /*
+    k1= stu01                         
+         k2=name v2=tom           
+         k2=sex v2=男             
+         k2=address v2=北京长安街~
+
+    */
+	for k1, v1 := range studentmap {
+		fmt.Println("k1=", k1)
+		for k2, v2 := range v1 {
+				fmt.Printf("\t k2=%v v2=%v\n", k2, v2)
+		}
+		fmt.Println()
+	}
+}
+```
 
 
 
@@ -742,3 +2012,26 @@ func main() {
 
 ## 十一、文件操作
 
+
+
+## 十二、单元测试
+
+
+
+## 十三、goroutine和channel
+
+
+
+## 十四、反射
+
+
+
+## 十五、TCP编程
+
+
+
+
+
+## 参考
+
+[](https://blog.csdn.net/zhaicheng55/article/details/127978156)
