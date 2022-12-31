@@ -2008,7 +2008,885 @@ func main() {
 
 ## 十、面向对象编程
 
+### 10.1 go面向对象编程说明
+1 ) Golang也支持面向对象编程(OOP)，但是和传统的面向对象编程有区别，并不是纯粹的面向对象语言。所以我们说Golang支持面向对象编程特性是比较准确的。
 
+2 ) Golang没有类(class)，Go语言的结构体(struct)和其它编程语言的类(class)有同等的地位，你可以理解Golang是基于struct来实现OOP特性的。
+
+3 ) Golang面向对象编程非常简洁，去掉了传统OOP语言的继承、方法重载、构造函数和析构函数、隐藏的this指针等等
+
+4 ) Golang仍然有面向对象编程的继承，封装和多态的特性，只是实现的方式和其它OOP语言不一样，比如继承 ：Golang没有extends 关键字，继承是通过匿名字段来实现。
+
+5 ) Golang面向对象(OOP)很优雅，OOP本身就是语言类型系统(typesystem)的一部分，通过接口(interface)关联，耦合性低，也非常灵活。也就是说在Golang中面向接口编程是非常重要的特性。
+
+代码演示
+
+```go
+package main
+import (
+	"fmt"
+)
+// 张老太养了20只猫猫:一只名字叫小白,今年3岁,白色。还有一只叫小花,
+// 今年100岁,花色。请编写一个程序，当用户输入小猫的名字时，就显示该猫的名字，
+// 年龄，颜色。如果用户输入的小猫名错误，则显示 张老太没有这只猫猫。
+
+//定义一个Cat结构体，将Cat的各个字段/属性信息，放入到Cat结构体进行管理
+type Cat struct {
+	Name string 
+	Age int 
+	Color string 
+	Hobby string
+	Scores [3]int // 字段是数组...
+}
+
+func main() {
+	// 创建一个Cat的变量
+	var cat1 Cat  // var a int
+	fmt.Printf("cat1的地址=%p\n", &cat1) //cat1的地址=0xc000058050
+	cat1.Name = "小白"
+	cat1.Age = 3
+	cat1.Color = "白色"
+	cat1.Hobby = "吃<・)))><<"
+	
+	fmt.Println("cat1=", cat1)//cat1= {小白 3 白色 吃<・)))><< [0 0 0]}
+	fmt.Println("猫猫的信息如下：")
+	fmt.Println("name=", cat1.Name)//name= 小白
+	fmt.Println("Age=", cat1.Age)//Age= 3
+	fmt.Println("color=", cat1.Color)//color= 白色
+	fmt.Println("hobby=", cat1.Hobby)//hobby= 吃<・)))><<
+}
+```
+
+### 10.2 结构体在内存里的布局
+
+![image-20221230094452918](imag/image-20221230094452918.png)
+
+- 基本语法
+
+```go
+type 结构体名称 struct {
+    field 1 type
+    field 2 type
+}
+```
+
+- 举例:
+
+```go
+type Student struct{
+    Namestring//字段
+    Ageint//字段
+    Scorefloat 32
+}
+```
+
+不同结构体变量的字段是独立，互不影响，一个结构体变量字段的更改，不影响另外一个, 结构体是**值类型**。
+
+```go
+package main
+import (
+	"fmt"
+)
+
+type Monster struct{
+	Name string
+	Age int
+}
+
+func main() {
+	//不同结构体变量的字段是独立，互不影响，一个结构体变量字段的更改，
+	//不影响另外一个, 结构体是值类型
+	var monster1 Monster
+	monster1.Name = "牛魔王"
+	monster1.Age = 500
+
+	monster2 := monster1 //结构体是值类型，默认为值拷贝
+	monster2.Name = "青牛精"
+
+	fmt.Println("monster1=", monster1) //monster1= {牛魔王 500}
+	fmt.Println("monster2=", monster2) //monster2= {青牛精 500}
+}
+```
+
+### 10.3 创建结构体变量和访问字段
+
+- 方式 1 - 直接声明
+
+```go
+var person Person
+```
+
+- 方式 2 - {}
+
+  var person Person = Person{}
+
+```go
+package main
+import (
+	"fmt"
+)
+
+type Person struct{
+	Name string
+	Age int
+}
+func main() {
+	//方式2
+	p2 := Person{"mary", 20}
+	// p2.Name = "tom"
+	// p2.Age = 18
+	fmt.Println(p2)//{mary 20}
+}
+```
+
+- 方式 3 - &
+
+```go
+package main
+import (
+	"fmt"
+)
+type Person struct{
+	Name string
+	Age int
+}
+func main() {
+	//var person *Person = new (Person)
+
+	var p3 *Person= new(Person)
+	//因为p3是一个指针，因此标准的给字段赋值方式
+	//(*p3).Name = "smith" 也可以这样写 p3.Name = "smith"
+	//原因: go的设计者 为了程序员使用方便，底层会对 p3.Name = "smith" 进行处理
+	//会给 p3 加上 取值运算 (*p3).Name = "smith"
+	(*p3).Name = "smith" 
+	p3.Name = "john" //
+
+	(*p3).Age = 30
+	p3.Age = 100
+	fmt.Println(*p3)//{john 100}
+}
+```
+
+- 方式 4 - {}
+
+```go
+package main
+import (
+	"fmt"
+)
+
+type Person struct{
+	Name string
+	Age int
+}
+func main() {
+	//var person *Person = &Person{}
+
+	//下面的语句，也可以直接给字符赋值
+	//var person *Person = &Person{"mary", 60} 
+	var person *Person = &Person{}
+
+	//因为person 是一个指针，因此标准的访问字段的方法
+	// (*person).Name = "scott"
+	// go的设计者为了程序员使用方便，也可以 person.Name = "scott"
+	// 原因和上面一样，底层会对 person.Name = "scott" 进行处理， 会加上 (*person)
+	(*person).Name = "scott"
+	person.Name = "scott~~"
+
+	(*person).Age = 88
+	person.Age = 10
+	fmt.Println(*person)//{scott~~ 10}
+}
+```
+
+说明:
+1 ) 第 3 种和第 4 种方式返回的是 结构体指针。
+
+2 ) 结构体指针访问字段的标准方式应该是：`(* 结构体指针).字段名` ，比如
+
+```go
+(*person).Name="tom"
+```
+
+3 ) 但go做了一个简化，也支持`结构体指针. 字段名`, 比如 person.Name=“tom”。更加符合程序员使用的习惯， go 编译器底层 对 person.Name 做了转化 `(*person).Name`
+
+### 10.4 结构体细节
+
+1 ) 结构体的所有字段在**内存中是连续**的
+
+```go
+package main 
+import "fmt"
+
+//结构体
+type Point struct {
+	x int
+	y int
+}
+
+//结构体
+type Rect struct {
+	leftUp, rightDown Point
+}
+
+//结构体
+type Rect2 struct {
+	leftUp, rightDown *Point
+}
+
+func main() {
+	r1 := Rect{Point{1,2}, Point{3,4}} 
+
+	//r1有四个int, 在内存中是连续分布
+	//打印地址
+	fmt.Printf("r1.leftUp.x 地址=%p r1.leftUp.y 地址=%p r1.rightDown.x 地址=%p r1.rightDown.y 地址=%p \n", 
+	&r1.leftUp.x, &r1.leftUp.y, &r1.rightDown.x, &r1.rightDown.y)
+	//r1.leftUp.x 地址=0xc0000101e0 r1.leftUp.y 地址=0xc0000101e8 
+    //r1.rightDown.x 地址=0xc0000101f0 r1.rightDown.y 地址=0xc0000101f8
+    
+	//r2有两个 *Point类型，这个两个*Point类型的本身地址也是连续的，
+	//但是他们指向的地址不一定是连续
+
+	r2 := Rect2{&Point{10,20}, &Point{30,40}} 
+
+	//打印地址
+	fmt.Printf("r2.leftUp 本身地址=%p r2.rightDown 本身地址=%p \n", &r2.leftUp, &r2.rightDown)
+    //r2.leftUp 本身地址=0xc00004a250 r2.rightDown 本身地址=0xc00004a258
+
+	//他们指向的地址不一定是连续...， 这个要看系统在运行时是如何分配
+	fmt.Printf("r2.leftUp 指向地址=%p r2.rightDown 指向地址=%p \n", r2.leftUp, r2.rightDown)
+    //r2.leftUp 指向地址=0xc0000140f0 r2.rightDown 指向地址=0xc000014100
+}
+```
+
+![image-20221230101339604](imag/image-20221230101339604.png)
+
+2 ) 结构体是用户单独定义的类型，和其它类型进行转换时需要有完全相同的字段(名字、个数和类型)
+
+```go
+package main 
+import "fmt"
+import "encoding/json"
+
+type A struct {
+	Num int
+}
+type B struct {
+	Num int
+}
+
+func main() {
+	var a A
+	var b B
+	a = A(b) // 可以转换，但是有要求，就是结构体的的字段要完全一样(包括:名字、个数和类型！)
+	fmt.Println(a, b)//{0} {0}
+}
+```
+
+3 ) 结构体进行type重新定义(相当于取别名)，Golang认为是新的数据类型，但是相互间可以强转
+
+4 ) struct的每个字段上，可以写上一个 **tag** , 该tag可以通过反射机制获取，常见的使用场景就是序列化和反序列化。
+
+- 序列化的使用场景:
+
+![image-20221230101722477](imag/image-20221230101722477.png)
+
+
+
+```go
+package main 
+import "fmt"
+import "encoding/json"
+
+type Monster struct{
+	Name string `json:"name"` // `json:"name"` 就是 struct tag
+	Age int `json:"age"`
+	Skill string `json:"skill"`
+}
+func main() {
+	//1. 创建一个Monster变量
+	monster := Monster{"牛魔王", 500, "芭蕉扇~"}
+
+	//2. 将monster变量序列化为 json格式字串
+	//   json.Marshal 函数中使用反射
+	jsonStr, err := json.Marshal(monster)
+	if err != nil {
+		fmt.Println("json 处理错误 ", err)
+	}
+	fmt.Println("jsonStr", string(jsonStr))//jsonStr {"name":"牛魔王","age":500,"skill":"芭蕉扇~"}
+}
+```
+
+### 10.5 方法
+在某些情况下，我们要需要声明(定义)方法。比如Person结构体:除了有一些字段外( 年龄，姓名…)，Person结构体还有一些行为比如:可以说话、跑步…，通过学习，还可以做算术题。这时就要用方法才能完成。
+
+Golang中的方法是**作用在指定的数据类型**上的(即：和指定的数据类型绑定)，因此**自定义类型，都可以有方法**，而不仅仅是 **struct**
+
+
+#### 10.5.1 方法的声明与调用
+
+```go
+func(recevier type)methodName（参数列表） (返回值列表){
+    方法体
+    return 返回值
+}  
+
+1 ) 参数列表：表示方法输入
+2 ) receviertype: 表示这个方法和type这个类型进行绑定，或者说该方法作用于type类型
+3 ) receivertype:type可以是结构体，也可以其它的自定义类型
+4 ) receiver: 就是type类型的一个变量(实例)，比如 ：Person结构体 的一个变量(实例)
+5 ) 返回值列表：表示返回的值，可以多个
+6 ) 方法主体：表示为了实现某一功能代码块
+7 ) return 语句不是必须的
+```
+
+```go
+//func( a A )test() {} 表示A结构体有一方法，方法名为 test
+//(a A) 体现 test方法是和A类型绑定的
+type A struct{
+	Numint
+}
+func(a A)test(){
+	fmt.Println(a.Num)
+}
+```
+
+
+
+```go
+//1 ) test方法和Person类型绑定
+//2 ) test方法只能通过 Person类型的变量来调用，而不能直接调用，也不能使用其它类型变量来调用
+//3 ) func(p Person)test(){}  p表示哪个Person变量调用，这个p就是它的副本, 这点和函数传参非常相似。
+//4 ) p 这个名字，有程序员指定，不是固定, 比如修改成person也是可以
+package main
+
+import (
+	"fmt"	
+)
+
+type Person struct{
+	Name string
+}
+
+//给Person类型绑定一方法
+func (person Person) test() {
+	person.Name = "jack"
+	fmt.Println("test() name=", person.Name) // 输出jack
+}
+
+func main() {
+	var p Person
+	p.Name = "tom"
+	p.test() //调用方法
+	fmt.Println("main() p.Name=", p.Name) //test() name= jack
+}
+```
+
+#### 10.5.2 方法的调用与传参机制原理
+
+方法的调用和传参机制和函数基本一样，不一样的地方是方法调用时，会将调用方法的变量，当做实参也传递给方法。下面我们举例说明。
+
+![image-20221230103724576](imag/image-20221230103724576.png)
+
+1 ) 在通过一个结构体实例变量去调用方法时，其调用机制和函数一样
+
+2 ) 不一样的地方时，变量调用方法时，该结构体实例变量变量本身也会作为一个参数传递到方法(如果变量是值类型，则进行值拷贝，如果变量是**引用类型，则进行地址拷贝**)
+
+#### 10.5.3 方法使用细节
+
+1 ) 结构体类型是值类型，在方法调用中，遵守值类型的传递机制，是值拷贝传递方式
+
+2 ) 如程序员希望在方法中，修改结构体变量的值，可以通过结构体指针的方式来处理
+
+```go
+package main
+
+import (
+	"fmt"	
+)
+
+type Circle struct {
+	radius float64
+}
+
+//为了提高效率，通常我们方法和结构体的指针类型绑定
+func (c *Circle) area2() float64 {
+	//因为 c是指针，因此我们标准的访问其字段的方式是 (*c).radius
+	//return 3.14 * (*c).radius * (*c).radius
+	// (*c).radius 等价  c.radius 
+	fmt.Printf("c 是  *Circle 指向的地址=%p", c)
+	c.radius = 10
+	return 3.14 * c.radius * c.radius
+}
+ 
+func main() {
+	//创建一个Circle 变量
+	var c Circle 
+	fmt.Printf("main c 结构体变量地址 =%p\n", &c)
+	c.radius = 7.0
+	//res2 := (&c).area2()
+	//编译器底层做了优化  (&c).area2() 等价 c.area()
+	//因为编译器会自动的给加上 &c
+	res2 := c.area2()
+	fmt.Println("面积=", res2)
+	fmt.Println("c.radius = ", c.radius) //10
+}
+```
+
+3 ) Golang中的方法作用在指定的数据类型上的(即：和指定的数据类型绑定)，因此自定义类型，都可以有方法，而不仅仅是struct， 比如int,float 32 等都可以有方法
+
+```go
+package main
+
+import (
+	"fmt"	
+)
+/*
+Golang中的方法作用在指定的数据类型上的(即：和指定的数据类型绑定)，因此自定义类型，
+都可以有方法，而不仅仅是struct， 比如int , float32等都可以有方法
+*/
+type integer int
+
+func (i integer) print() {
+	fmt.Println("i=", i)
+}
+//编写一个方法，可以改变i的值
+func (i *integer) change() {
+	*i = *i + 1
+}
+
+func main() {
+	var i integer = 10
+	i.print()//10
+	i.change()
+	fmt.Println("i=", i)//11
+}
+```
+
+4 ) 方法的访问范围控制的规则，和函数一样。方法名首字母小写，只能在本包访问，方法首字母大写，可以在本包和其它包访问。
+
+5 ) 如果一个类型实现了String()这个方法，那么fmt.Println默认会调用这个变量String()进行输出
+
+```go
+package main
+
+import (
+	"fmt"	
+)
+type Student struct {
+	Name string
+	Age int
+}
+
+//给*Student实现方法String()
+func (stu *Student) String() string {
+	str := fmt.Sprintf("Name=[%v] Age=[%v]", stu.Name, stu.Age)
+	return str
+}
+
+func main() {
+	//定义一个Student变量
+	stu := Student{
+		Name : "tom",
+		Age : 20,
+	}
+	//如果你实现了 *Student 类型的 String方法，就会自动调用
+	fmt.Println(&stu) //Name=[tom] Age=[20]
+}
+```
+
+#### 10.5.4 方法与函数的区别
+
+1 ) 调用方式不一样
+
+- 函数的调用方式: 函数名(实参列表)
+- 方法的调用方式: 变量.方法名(实参列表)
+
+2 ) 对于普通函数，接收者为值类型时，不能将指针类型的数据直接传递，反之亦然
+
+```go
+package main
+
+import (
+	"fmt"	
+)
+
+type Person struct {
+	Name string
+} 
+
+//对于普通函数，接收者为值类型时，不能将指针类型的数据直接传递，反之亦然
+func test01(p Person) {
+	fmt.Println(p.Name)
+}
+
+func test02(p *Person) {
+	fmt.Println(p.Name)
+}
+
+func main() {
+	p := Person{"tom"}
+	test01(p)
+	test02(&p)
+}
+```
+
+3 ) 对于方法（如struct的方法），接收者为值类型时，可以直接用指针类型的变量调用方法，反过来同样也可以
+
+```go
+package main
+
+import (
+	"fmt"	
+)
+
+type Person struct {
+	Name string
+} 
+
+//对于方法（如struct的方法），
+//接收者为值类型时，可以直接用指针类型的变量调用方法，反过来同样也可以
+func (p Person) test03() {
+	p.Name = "jack"
+	fmt.Println("test03() =", p.Name) // jack
+}
+
+func (p *Person) test04() {
+	p.Name = "mary"
+	fmt.Println("test03() =", p.Name) // mary
+}
+
+func main() {
+	p := Person{"tom"}
+
+	p.test03()
+	fmt.Println("main() p.name=", p.Name) // tom
+	
+	(&p).test03() // 从形式上是传入地址，但是本质仍然是值拷贝
+	fmt.Println("main() p.name=", p.Name) // tom
+
+	(&p).test04()
+	fmt.Println("main() p.name=", p.Name) // mary
+	p.test04() // 等价 (&p).test04 , 从形式上是传入值类型，但是本质仍然是地址拷贝
+}
+```
+
+1 ) 不管调用形式如何，真正决定是值拷贝还是地址拷贝，看这个**方法是和哪个类型绑定**.
+
+2 ) 如果是和值类型，比如 ( **p Person** ), 则是值拷贝， 如果和指针类型，比如是 ( **p\*Person** ) 则是地址拷贝。
+
+
+
+
+
+
+
+### 10.8 接口
+
+在Golang中 多态 特性主要是通过接口来体现的。
+
+```go
+package main
+import (
+	"fmt"
+)
+
+//声明/定义一个接口
+type Usb interface {
+	//声明了两个没有实现的方法
+	Start() 
+	Stop()
+}
+
+//声明/定义一个接口
+type Usb2 interface {
+	//声明了两个没有实现的方法
+	Start() 
+	Stop()
+	Test()
+}
+
+type Phone struct {
+}  
+//让Phone 实现 Usb接口的方法
+func (p Phone) Start() {
+	fmt.Println("手机开始工作。。。")
+}
+func (p Phone) Stop() {
+	fmt.Println("手机停止工作。。。")
+}
+
+type Camera struct {
+}
+//让Camera 实现   Usb接口的方法
+func (c Camera) Start() {
+	fmt.Println("相机开始工作~~~。。。")
+}
+func (c Camera) Stop() {
+	fmt.Println("相机停止工作。。。")
+}
+
+//计算机
+type Computer struct {
+}
+
+//编写一个方法Working 方法，接收一个Usb接口类型变量
+//只要是实现了 Usb接口 （所谓实现Usb接口，就是指实现了 Usb接口声明所有方法）
+func (c Computer) Working(usb Usb) {
+	//通过usb接口变量来调用Start和Stop方法
+	usb.Start()
+	usb.Stop()
+}
+
+func main() {
+	//先创建结构体变量
+	computer := Computer{}
+	phone := Phone{}
+	camera := Camera{}
+
+	//关键点
+	computer.Working(phone)
+	computer.Working(camera) //
+}
+//---结果-----
+手机开始工作。。。
+手机停止工作。。。
+相机开始工作~~~。。。
+相机停止工作。。。
+```
+
+接口概念
+
+interface类型可以定义一组方法，但是这些不需要实现。并且interface不能包含任何变量。到某个 自定义类型(比如结构体Phone)要使用的时候,在根据具体情况把这些方法写出来(实现)。
+
+1 ) 接口里的**所有方法都没有方法体**，即接口的方法都是没有实现的方法。接口体现了程序设计的多态和高内聚低偶合的思想。
+
+2 ) Golang中的接口，**不需要显式的实现**。只要一个变量，含有接口类型中的所有方法，那么这个变量就实现这个接口。因此，Golang中没有`implement`这样的关键字
+#### 10.8.1注意事项与细节
+1 ) 接口本身不能创建实例,但是可以指向一个实现了该接口的自定义类型的变量(实例)
+
+2 ) 接口中所有的方法都没有方法体,即都是没有实现的方法。
+
+3 ) 在Golang中，一个自定义类型需要将某个接口的所有方法都实现，我们说这个自定义类型实现 了该接口。
+
+4 ) 一个自定义类型只有实现了某个接口，才能将该自定义类型的实例(变量)赋给接口类型
+
+5 ) 只要是自定义数据类型，就可以实现接口，不仅仅是结构体类型。
+
+6 ) 一个自定义类型可以实现多个接口
+
+```go
+package main
+import (
+	"fmt"
+)
+
+type AInterface interface {
+	Say()
+}
+
+type BInterface interface {
+	Hello()
+}
+
+type Monster struct {
+}
+func (m Monster) Hello() {
+	fmt.Println("Monster Hello()~~")
+}
+func (m Monster) Say() {
+	fmt.Println("Monster Say()~~")
+}
+
+func main() {
+	//Monster实现了AInterface 和 BInterface
+	var monster Monster
+	var a2 AInterface = monster
+	var b2 BInterface = monster
+	a2.Say() //Monster Say()~~
+	b2.Hello()  //Monster Hello()~~
+}
+```
+
+7 ) Golang接口中不能有任何变量
+
+```go
+type AInterface interface {
+	//Name string //错误
+	Say()
+}
+```
+
+8 ) 一个接口(比如A接口)可以继承多个别的接口(比如B，C接口)，这时如果要实现A接口，也必须将B,C接口的方法也全部实现。
+
+```go
+package main
+import (
+	"fmt"
+)
+
+type BInterface interface {
+	test01()
+}
+
+type CInterface interface {
+	test02()
+}
+
+type AInterface interface {
+	BInterface
+	CInterface
+	test03()
+}
+
+//如果需要实现AInterface,就需要将BInterface CInterface的方法都实现
+type Stu struct {
+}
+func (stu Stu) test01() {
+}
+func (stu Stu) test02() {
+}
+func (stu Stu) test03() {	
+}
+
+type T  interface{
+}
+
+func main() {
+	var stu Stu
+	var a AInterface = stu
+	a.test01()
+}
+```
+
+10 ) 空接口interface{}没有任何方法，所以所有类型都实现了空接口, 即我们可以把任何一个变量赋给空接口。
+
+```go
+package main
+import (
+	"fmt"
+)
+
+type BInterface interface {
+	test01()
+}
+
+type CInterface interface {
+	test02()
+}
+
+type AInterface interface {
+	BInterface
+	CInterface
+	test03()
+}
+
+//如果需要实现AInterface,就需要将BInterface CInterface的方法都实现
+type Stu struct {
+}
+func (stu Stu) test01() {
+
+}
+func (stu Stu) test02() {
+	
+}
+func (stu Stu) test03() {
+	
+}
+
+type T  interface{
+
+}
+
+func main() {
+    var stu Stu
+	var a AInterface = stu
+	a.test01()
+    
+	var t T = stu //ok
+	fmt.Println(t)//{}
+	var t2 interface{}  = stu
+	var num1 float64 = 8.8
+	t2 = num1
+	t = num1
+	fmt.Println(t2, t)//8.8 8.8
+}
+```
+
+### 10.9 接口与继承的区别
+
+```go
+package main
+import (
+	"fmt"
+)
+
+//Monkey结构体
+type Monkey struct {
+	Name string
+}
+
+//声明接口
+type BirdAble interface {
+	Flying()
+}
+
+type FishAble interface {
+	Swimming()
+}
+
+func (this *Monkey) climbing() {
+	fmt.Println(this.Name, " 生来会爬树..")
+}
+
+//LittleMonkey结构体
+type LittleMonkey struct {
+	Monkey //继承
+}
+
+
+//让LittleMonkey实现BirdAble
+func (this *LittleMonkey) Flying() {
+	fmt.Println(this.Name, " 通过学习，会飞翔...")
+}
+
+//让LittleMonkey实现FishAble
+func (this *LittleMonkey) Swimming() {
+	fmt.Println(this.Name, " 通过学习，会游泳..")
+}
+
+func main() {
+	//创建一个LittleMonkey 实例
+	monkey := LittleMonkey{
+		Monkey {
+			Name : "悟空",
+		},
+	}
+	monkey.climbing()//悟空  生来会爬树..
+	monkey.Flying()//悟空  通过学习，会飞翔...
+	monkey.Swimming()//悟空  通过学习，会游泳..
+}
+```
+
+1 ) 当A结构体继承了B结构体，那么A结构就自动的继承了B结构体的字段和方法，并且可以直接使用
+
+2 ) 当A结构体需要扩展功能，同时不希望去破坏继承关系，则可以去实现某个接口即可，因此我们可以认为：实现接口是对继承机制的补充.
+
+- 实现接口可以看作是对 继承的一种补充
+
+![image-20221230144812730](imag/image-20221230144812730.png)
+
+- 接口和继承解决的解决的问题不同
+
+继承的价值主要在于：解决代码的复用性和可维护性。
+
+接口的价值主要在于：设计，设计好各种规范(方法)，让其它自定义类型去实现这些方法。
+
+- 接口比继承更加灵活 Person Student BirdAbleLittleMonkey
+
+接口比继承更加灵活，继承是满足 is-a的关系，而接口只需满足 like-a的关系。
+
+- 接口在一定程度上实现代码解耦
 
 ## 十一、文件操作
 
@@ -2020,7 +2898,123 @@ func main() {
 
 ## 十三、goroutine和channel
 
+### 13.1 goroutine线程-基本介绍
 
+- 进程就是程序在操作系统中的一次执行过程，是系统进行资源分配和调度的基本单位
+- 线程是进程的一个执行实例，是程序执行的最小单元，它是比进程更小的能独立运行的基本单位
+- 一个进程可以创建销毁多个线程，同一个进程中的多个线程可以并发执行
+- 一个程序至少一个进程，一个进程至少一个线程
+
+- 并发和并行
+
+1 ) 多线程程序在单核上运行，就是并发
+
+2 ) 多线程程序在多核上运行，就是并行
+
+![image-20221230145931588](imag/image-20221230145931588.png)
+
+**并发**：因为是在一个cpu上，比如有10个线程，每个线程执行10毫秒（进行轮询操作），从人的角度看，好像这10个线程都在运行，但是从微观上看，在某一个时间点看，其实只有一个线程在执行，这就是并发。
+
+**并行**：因为是在多个cpu上（比如有10个cpu），比如有10个线程，每个线程执行10毫秒（各自在不同cpu上执行），从人的角度看，这10个线程都在运行，但是从微观上看，在某一个时间点看，也同时有10个线程在执行，这就是并行。
+
+### 13.2 Go协程和Go主线程
+Go主线程(有程序员直接称为线程/也可以理解成进程): 一个Go线程上，可以起多个协程，你可以这样理解，协程是轻量级的线程[编译器做优化]。
+
+Go协程的特点:
+
+- 有独立的栈空间
+- 共享程序堆空间
+- 调度由用户控制
+- 协程是轻量级的线程
+
+![image-20221230150414973](imag/image-20221230150414973.png)
+
+
+```go
+package main
+import (
+   "fmt"
+   "strconv"
+   "time"
+)
+
+// 在主线程(可以理解成进程)中，开启一个goroutine, 该协程每隔1秒输出 "hello,world"
+// 在主线程中也每隔一秒输出"hello,golang", 输出10次后，退出程序
+// 要求主线程和goroutine同时执行
+
+//编写一个函数，每隔1秒输出 "hello,world"
+func test() {
+   for i := 1; i <= 10; i++ {
+       //strconv.Itoa将数字转换成对应的字符串类型的数字
+      fmt.Println("test () hello,world " + strconv.Itoa(i))//test () hello,world 1
+      time.Sleep(time.Second)
+   }
+}
+
+func main() {
+
+   go test() // 开启了一个协程
+
+   for i := 1; i <= 10; i++ {
+      fmt.Println(" main() hello,golang" + strconv.Itoa(i))
+      time.Sleep(time.Second) //main() hello,golang1
+   }
+}
+```
+
+![image-20221230161232254](imag/image-20221230161232254.png)
+
+**协程特点**
+1 ) 主线程是一个物理线程，直接作用在cpu上的。是重量级的，非常耗费cpu资源。
+
+2 ) 协程从主线程开启的，是轻量级的线程，是逻辑态。对资源消耗相对小。
+
+3 ) Golang的协程机制是重要的特点，可以轻松的开启上万个协程。其它编程语言的并发机制是一般基于线程的，开启过多的线程，资源耗费大，这里就突显Golang在并发上的优势了
+
+### 13.3 MPG模式基本介绍
+
+![image-20221230161751132](imag/image-20221230161751132.png)
+
+- M:操作系统的主线程（是物理线程）
+- P:协程执行需要的上下文
+- G：协程
+
+#### 13.3.1 MPG模式运行的状态 1
+
+![image-20221230161751132](imag/image-20221230162042649.png)
+
+- 当前程序有三个M，如果三个M都在一个cpu运行，就是并发，如果在不同的cpu运行就是并行
+- M1，M2，M3正在执行一个G，M1的协程队列有三个，M2的协程队列有3个，M3协程队列有2个
+- 从上图可以看到:Go的协程是轻量级的线程，是逻辑态的，Go可以容易的起上万个协程。
+- 其他程序c/java的多线程，往往是内核态的，比较重量级，几千个线程可能耗光cpu
+  
+
+#### 13.3.2 MPG模式运行的状态 2
+
+![image-20221230164234486](imag/image-20221230164234486.png)
+
+- 设置GOLANG运行的CPU数
+- 为了充分了利用多cpu的优势，在Golang程序中，设置运行的cpu数目
+
+```go
+package main
+import (
+	"runtime"
+	"fmt"
+)
+
+func main() {
+	cpuNum := runtime.NumCPU()
+	fmt.Println("cpuNum=", cpuNum)
+
+	//可以自己设置使用多个cpu
+	runtime.GOMAXPROCS(cpuNum - 1)
+	fmt.Println("ok")
+}
+```
+
+- **go1.8后，默认让程序运行在多个核上，可以不用设置了**
+- go1.8前，还是要设置以下，可以更高效的利用cpu
 
 ## 十四、反射
 
