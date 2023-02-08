@@ -332,6 +332,69 @@ func main() {
 }
 ```
 
+#### 3.4 标识符命名
+
+1 ) 由 26 个英文字母大小写， 0 - 9 ，_ 组成
+
+2 ) 数字不可以开头。var num int //ok var 3num int//error
+
+3）Golang中严格区分大小写。
+
+```go
+//num 和 Num 是两个不同的变量
+var num int
+var Num int
+```
+
+4 ) 标识符不能包含空格。
+
+5 ) 下划线"_"本身在Go中是一个特殊的标识符，称为**空标识符**。可以代表任何其它的标识符，但是它对应的值会被忽略(比如：忽略某个返回值)。所以仅能被作为占位符使用，不能作为标识符使用
+
+```go
+//空白标识符 ('_') 可以赋给任何类型的任何值或用任何类型的值声明。空白标识符会被丢弃，不会被编译器使用。例如，当您想要捕获返回值但不打算在以后使用此值时，可以考虑使用空白标识符。
+var _ int = 40 //error
+fmt.Println(_)//无法将 '_' 用作值
+```
+
+6 ) 不能以系统**保留关键字**作为标识符（一共有 25 个），比如 break，if 等等
+
+
+
+**注意事项**
+
+1 ) 包名：保持package的名字和目录保持一致，尽量采取有意义的包名，简短，有意义，不要和标准库不要冲突 fmt
+
+2 ) 变量名、函数名、常量名：采用驼峰法 //stuName, goodPrice 
+
+3）如果变量名、函数名、常量名首字母大写，则可以被其他的包访问；如果首字母小写，则只能在本包中使用 ( 注：可以简单的理解成，**首字母大写是公开的，首字母小写是私有的**)，在golang没有public，private 等关键字。
+
+
+
+#### 3.5 系统保留字
+
+在go中，为了简化代码编译过程中对代码的解析，其定义的保留关键字只有25个。
+
+| break    | default     | func   | interface | select |
+| -------- | ----------- | ------ | --------- | ------ |
+| case     | defer       | go     | map       | struct |
+| chan     | else        | goto   | package   | switch |
+| const    | fallthrough | if     | range     | type   |
+| continue | for         | import | return    | var    |
+
+
+
+#### 3.6 系统预定义标识符
+
+除了保留关键字外，Go还提供了36个预定义的标识符，其包括**基本数据类型**和**系统内嵌函数**
+
+| append    | bool       | byte   | cap   | close   | complex |
+| --------- | ---------- | ------ | ----- | ------- | ------- |
+| complex64 | complex128 | unit16 | copy  | false   | float32 |
+| float64   | imag       | int    | int8  | int16   | uint32  |
+| int32     | int64      | iota   | len   | make    | new     |
+| nil       | panic      | uint64 | print | println | real    |
+| recover   | string     | true   | uint  | uint8   | uintprt |
+
 
 
 ## 四、运算符
