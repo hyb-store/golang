@@ -399,6 +399,140 @@ fmt.Println(_)//无法将 '_' 用作值
 
 ## 四、运算符
 
+### 4.1 算术运算符的一览表
+
+| 运算符 | 运算         | 范例       | 结果    |
+| ------ | ------------ | ---------- | ------- |
+| +      | 正号         | +3         | 3       |
+| -      | 负号         | -4         | -4      |
+| +      | 加           | 5+5        | 10      |
+| -      | 减           | 6-4        | 2       |
+| *      | 乘           | 3*4        | 12      |
+| /      | 除           | 5/5        | 1       |
+| %      | 取模（取余） | 7%5        | 2       |
+| ++     | 自增         | a=2 a++    | a=3     |
+| –      | 自减         | a=2 a–     | a=1     |
+| +      | 字符串相加   | “he”+“llo” | “hello” |
+
+**注意**：
+
+1）Golang的自增自减只能当做一个独立语言使用时，不能这样使用。
+
+2）Golang 的++ 和 – 只能写在变量的后面，不能写在变量的前面，即：只有`a++`,`a--`，没有`++a`,`--a`
+
+```go
+package main
+import (
+	_ "fmt" 
+)
+func main() {
+	//在golang中，++ 和 -- 只能独立使用.
+	var i int = 8
+	var a int 
+	i++ // 独立使用，正确
+	++i // 错误，前++
+	a = i++ //错误，i++只能独立使用 
+	a = i-- //错误, i--只能独立使用
+
+	if i++ > 0 { //错误
+		fmt.Println("ok")
+	}
+}
+```
+
+
+
+### 4.2 面试题
+
+```go
+package main
+import (
+	"fmt" 
+)
+func main() {
+
+	//有两个变量，a和b，要求将其进行交换，但是不允许使用中间变量，最终打印结果
+	var a int = 10
+	var b int = 20
+
+	a = a + b //
+	b = a - b // b = a + b - b ==> b = a
+	a = a - b // a = a + b - a ==> a = b
+
+	fmt.Printf("a=%v b=%v", a, b)
+}
+```
+
+
+
+### 4.3 特别说明
+
+go语言不支持三元运算符
+
+```go
+package main
+import (
+	"fmt" 
+)
+func main() {
+	var n int 
+	var i int = 10
+	var j int = 12
+	//传统的三元运算
+	//n = i > j ? i : j
+	if i > j {
+		n = i
+	} else {
+		n = j
+	}
+	fmt.Println("n=", n) // 12
+}
+```
+
+
+
+### 4.4 从键盘输入
+
+1 ) 导入fmt包
+
+2 ) 调用fmt包的 fmt.Scanln () 或者 fmt.Scanf ()
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+
+	//要求：可以从控制台接收用户信息，【姓名，年龄，薪水, 是否通过考试 】。
+	//方式1 fmt.Scanln
+	//1先声明需要的变量
+	var name string
+	var age byte
+	var sal float32
+	var isPass bool
+	fmt.Println("请输入姓名 ")
+	// //当程序执行到 fmt.Scanln(&name),程序会停止在这里，等待用户输入，并回车
+	fmt.Scanln(&name)
+	fmt.Println("请输入年龄 ")
+	fmt.Scanln(&age)
+	fmt.Println("请输入薪水 ")
+	fmt.Scanln(&sal)
+
+	fmt.Println("请输入是否通过考试 ")
+	fmt.Scanln(&isPass)
+
+	fmt.Printf(" 名字是 %v \n 年龄是 %v \n 薪水是 %v \n 是否通过考试 %v \n", name, age, sal, isPass)
+
+	//方式2:fmt.Scanf,可以按指定的格式输入
+	fmt.Println("请输入你的姓名，年龄，薪水, 是否通过考试， 使用空格隔开")
+	fmt.Scanf("%s %d %f %t", &name, &age, &sal, &isPass)
+	fmt.Printf(" huangyb名字是 %v \n 年龄是 %v \n 薪水是 %v \n 是否通过考试 %v \n", name, age, sal, isPass)
+}
+```
+
 
 
 ## 五、程序流程控制
