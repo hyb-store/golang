@@ -205,6 +205,135 @@ func main() {
 ```
 在转换中，比如将 int 64 转成 int 8 【- 128 - – 127 】 ，编译时不会报错，只是转换的结果是按**溢出处理**，和我们希望的结果不一样。 因此在转换时，需要考虑范围.
 
+#### 3.3.2 基本数据类型和string的转换
+
+方式 1 ：fmt.Sprintf(“%参数”, 表达式)
+
+参数需要和表达式的数据类型相匹配
+
+fmt.Sprintf() 会返回转换后的字符串
+
+```go
+package main
+import (
+	"fmt"
+	_ "unsafe"
+	"strconv"
+)
+
+//演示golang中基本数据练习转成string使用
+func main() {
+
+	var num1 int = 99
+	var num2 float64 = 23.456
+	var b bool = true
+	var myChar byte = 'h'
+	var str string //空的str
+
+	//使用第一种方式来转换 fmt.Sprintf方法
+
+	str = fmt.Sprintf("%d", num1)
+	fmt.Printf("str type %T str=%q\n", str, str)//str type string str="99"
+
+	str = fmt.Sprintf("%f", num2)
+	fmt.Printf("str type %T str=%q\n", str, str)//str type string str="23.456000" 
+
+	str = fmt.Sprintf("%t", b)
+	fmt.Printf("str type %T str=%q\n", str, str)//str type string str="true"
+
+	str = fmt.Sprintf("%c", myChar)
+	fmt.Printf("str type %T str=%q\n", str, str)//str type string str="h"
+}
+```
+
+方式 2 ：使用strconv 包的函数
+
+```go
+package main
+import (
+	"fmt"
+	_ "unsafe"
+	"strconv"
+)
+
+//基本数据练习转成string使用
+func main() {
+	//第二种方式 strconv 函数 
+	var num3 int = 99
+	var num4 float64 = 23.456
+	var b2 bool = true
+
+    //func FormatInt(i int64, base int) string
+    //返回i的base进制的字符串表示。base 必须在2到36之间，结果中会使用小写字母'a'到'z'表示大于10的数字。
+	str = strconv.FormatInt(int64(num3), 10)
+	fmt.Printf("str type %T str=%q\n", str, str)//str type string str="99"
+	
+	// strconv.FormatFloat(num4, 'f', 10, 64)
+	// 说明： 'f' 格式 10：表示小数位保留10位 64 :表示这个小数是float64
+	str = strconv.FormatFloat(num4, 'f', 10, 64)
+	fmt.Printf("str type %T str=%q\n", str, str)//str type string str="23.4560000000"
+
+	str = strconv.FormatBool(b2)
+	fmt.Printf("str type %T str=%q\n", str, str)//str type string str="true" 
+
+	//strconv包中有一个函数Itoa
+    //Itoa是FormatInt(i, 10) 的简写
+	var num5 int64 = 4567
+	str = strconv.Itoa(int(num5))
+	fmt.Printf("str type %T str=%q\n", str, str)//str type string str="4567"
+}
+```
+
+#### 3.3.3 string类型转基本数据类型
+
+使用时strconv包的函数
+
+> func ParseBool(str string)(value bool,err error)
+> func ParseFloat(s string,bitSize int)(f float64,err error)
+> func ParseInt(s string,base int,bitSize int)(i int64,err error)
+> func ParseUint(s string,b int,bitSize int)(n uint64,err error)
+
+```go
+package main
+import (
+	"fmt"
+	"strconv"
+)
+
+//string转成基本数据类型
+func main() {
+	var str string = "true"
+	var b bool
+	// b, _ = strconv.ParseBool(str)
+	// 说明
+	// 1. strconv.ParseBool(str) 函数会返回两个值 (value bool, err error)
+	// 2. 因为我只想获取到 value bool ,不想获取 err 所以我使用_忽略
+	b , _ = strconv.ParseBool(str)
+	fmt.Printf("b type %T  b=%v\n", b, b)//b type bool  b=true
+	
+	var str2 string = "1234590"
+	var n1 int64
+	var n2 int
+	n1, _ = strconv.ParseInt(str2, 10, 64) 
+	n2 = int(n1)
+	fmt.Printf("n1 type %T  n1=%v\n", n1, n1)//n1 type int64  n1=1234590
+	fmt.Printf("n2 type %T n2=%v\n", n2, n2)//n2 type int n2=1234590 
+
+	var str3 string = "123.456"
+	var f1 float64
+	f1, _ = strconv.ParseFloat(str3, 64)
+	fmt.Printf("f1 type %T f1=%v\n", f1, f1)//f1 type float64 f1=123.456
+
+	//注意：
+	var str4 string = "hello"
+	var n3 int64 = 11
+	n3, _ = strconv.ParseInt(str4, 10, 64)
+	fmt.Printf("n3 type %T n3=%v\n", n3, n3)//n3 type int64 n3=0 
+}
+```
+
+
+
 ## 四、运算符
 
 
