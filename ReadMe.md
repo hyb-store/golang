@@ -537,6 +537,464 @@ func main() {
 
 ## 五、程序流程控制
 
+### 5.1 单分支控制
+
+```go
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	//编写一个程序,可以输入人的年龄,如果该同志的年龄大于18岁,则输出 "你年龄大于18,要对自己的行为负责!"
+	//1.年龄 ==> var age int 
+	//2.从控制台接收一个输入 fmt.Scanln(&age)
+	//3.if判断
+
+	var age int
+	fmt.Println("请输入年龄:")
+	fmt.Scanln(&age)
+
+	if age > 18 {
+		fmt.Println("你年龄大于18,要对自己的行为负责!")
+	}
+
+	//golang支持在if中，直接定义一个变量，比如下面
+	if age := 20; age > 18 {
+		fmt.Println("你年龄大于18,要对自己的行为负责!")
+	}	
+}
+```
+
+
+
+### 5.2 双分支控制
+
+```go
+if 条件表达式{
+	执行代码块1
+}else{
+	执行代码块2
+}
+```
+
+
+
+```go
+
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	var age int
+	fmt.Println("请输入年龄:")
+	fmt.Scanln(&age)
+
+    if age > 18 {//必须加{}
+		fmt.Println("你年龄大于18~....")
+	} else {//else不能换行
+		fmt.Println("你的年龄不大这次放过你了")
+	}
+}
+```
+
+
+
+### 5.3 多分支控制
+
+```go
+if 条件表达式1{
+	执行代码块1
+}else if 条件表达式2{
+	执行代码块2
+}
+......
+else{
+	执行代码块n
+}
+```
+
+
+
+### 5.4 switch
+
+1 ) switch 语句用于基于不同条件执行不同动作，每一个 case 分支都是唯一的，从上到下逐一测 试，直到匹配为止。
+
+2 ) 匹配项后面也不需要再加 **break**
+
+```go
+switch 表达式{
+    case 表达式1，表达式2，..:
+    	语句块1
+    fallthrough//穿透 如果有这个则会继续执行下面的case
+    case 表达式3，表达式4，..:
+    	语句块2
+    ...
+    default://没有任何case匹配 折执行default 不是必须的
+    	语句块
+}
+```
+
+**使用细节**
+
+1 ) case/switch后是一个表达式( 即：常量值、变量、一个有返回值的函数等都可以)
+
+2 ) case后的各个表达式的值的数据类型，必须和 switch 的表达式数据类型一致
+
+```go
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	var n1 int32 = 20
+    var n2 int64 = 20
+	switch n1 { //错误，原因是n2和n1数据类型不一致      
+		case n2:
+			fmt.Println("ok1")
+		default:
+			fmt.Println("没有匹配到...")
+	}
+}
+```
+
+3 ) case后面可以带多个表达式，使用逗号间隔。比如 case 表达式 1 , 表达式 2 …
+
+```go
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	var n1 int32 = 51
+	var n2 int32 = 20
+	switch n1 {
+		case n2, 10, 5 :  // case 后面可以有多个表达式
+			fmt.Println("ok1")
+		case 90 : 
+			fmt.Println("ok2~")
+		
+	}
+}
+```
+
+4 ) case后面的表达式如果是常量值(字面量)，则要求不能重复
+
+```go
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	var n1 int32 = 51
+	var n2 int32 = 20
+	switch n1 {
+		case n2, 10, 5 :  // case 后面可以有多个表达式
+			fmt.Println("ok1")
+		case 5 : //错误，前面已经有常量5了，不能重复
+			fmt.Println("ok2~")
+		default:
+			fmt.Println("没有匹配到...")
+	}
+}
+```
+
+5）case后面不需要带break, 程序匹配到一个case后就会执行对应的代码块，然后退出switch，如果一个都匹配不到，则执行 default
+
+6 ) default 语句不是必须的.
+
+7 ) switch 后也可以不带表达式，类似 if–else分支来使用。
+
+```go
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	//switch 后也可以不带表达式，类似 if --else分支来使用。【案例演示】
+	var age int = 10
+	
+	switch {
+		case age == 10 :
+			fmt.Println("age == 10")
+		case age == 20 :
+			fmt.Println("age == 20")
+		default :
+			fmt.Println("没有匹配到")
+	}
+    
+    //case 中也可以对 范围进行判断
+	var score int = 90
+	switch {
+		case score > 90 :
+			fmt.Println("成绩优秀..")
+		case score >=70 && score <= 90 :
+			fmt.Println("成绩优良...")
+		case score >= 60 && score < 70 :
+			fmt.Println("成绩及格...")
+		default :
+			fmt.Println("不及格")
+	}
+}
+```
+
+8 ) switch 后也可以直接声明/定义一个变量，分号结束，不推荐。
+
+```go
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	//switch 后也可以直接声明/定义一个变量，分号结束，不推荐	
+	switch grade := 90; { // 在golang中，可以这样写
+		case grade > 90 :
+			fmt.Println("成绩优秀~..")
+		case grade >=70 && grade <= 90 :
+			fmt.Println("成绩优良~...")
+		case grade >= 60 && grade < 70 :
+			fmt.Println("成绩及格~...")
+		default :
+			fmt.Println("不及格~")
+	}
+}
+```
+
+9 ) switch 穿透-fallthrough ，如果在case语句块后增加fallthrough,则会继续执行下一个case，也 叫switch穿透
+
+```go
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	//switch 的穿透 fallthrought
+	var num int = 10
+	switch num {
+		case 10:
+			fmt.Println("ok1")
+			fallthrough //默认只能穿透一层
+		case 20:
+			fmt.Println("ok2")
+			fallthrough
+		case 30:
+			fmt.Println("ok3")	
+		default:
+			fmt.Println("没有匹配到..")
+	}
+}
+```
+
+10 ) TypeSwitch：switch 语句还可以被用于 type-switch 来判断某个 interface 变量中实际指向的变量类型
+
+```go
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	
+    var x interface{}
+    var y = 10.0
+    x = y
+    switch x := x.(type) {
+		case nil:
+			fmt.Println("x 的类型：%T",i)
+		case int:
+			fmt.Println("x 是int型")
+		case float64:
+			fmt.Println("x 是float型")	
+        case func(int) float:
+			fmt.Println("x 是func(int) float")	 		case bool, string:
+			fmt.Println("x 是bool 或 string型")     		default:
+			fmt.Println("未知型..")
+	}
+}
+```
+
+
+
+### 5.5 for循环
+
+1）基本语法
+
+```go
+for 循环变量初始化; 循环条件; 循环变量迭代 {
+	循环操作(语句)
+}
+```
+
+
+
+2）for循环的第二种使用方式
+
+```go
+for 循环判断条件 {
+	//循环执行语句
+}
+```
+
+将变量初始化和变量迭代写到其它位置
+
+```go
+package main
+import (
+	"fmt"
+)
+func main(){
+	//for循环的第二种写法
+	j := 1 //循环变量初始化
+	for j <= 10 { //循环条件  
+		fmt.Println("你好，Golang Roadmap~", j)
+		j++ //循环变量迭代
+	}
+}
+```
+
+3 ) for循环的第三种使用方式
+
+```go
+for {
+//循环执行语句
+}
+```
+
+上面的写法等价 for;;{} 是一个无限循环， 通常需要配合 break 语句使用
+
+```go
+package main
+import (
+	"fmt"
+)
+func main(){
+	//for循环的第三种写法, 这种写法通常会配合break使用
+	k := 1
+	for {  // 这里也等价 for ; ; { 
+		if k <= 10 {
+			fmt.Println("你好，Golang Roadmap~", k)
+		} else {
+			break //break就是跳出这个for循环
+		}
+		k++
+	}
+}
+```
+
+4 ) Golang 提供 for-range的方式，可以方便遍历字符串和数组(注: 数组的遍历，我们放到讲数组 的时候再讲解) ，案例说明如何遍历字符串。 
+
+字符串遍历方式 1 - 传统方式
+
+```go
+package main
+import (
+	"fmt"
+)
+func main(){
+	//字符串遍历方式1-传统方式
+	var str string = "hello,world!北京"
+	for i := 0; i < len(str); i++ {
+		fmt.Printf("%c \n", str[i]) //使用到下标...
+	}
+}
+```
+
+字符串遍历方式 2 - for-range
+
+```go
+package main
+import (
+	"fmt"
+)
+func main(){
+	//字符串遍历方式2-for-range
+	str = "abc~ok上海"
+	for index, val := range str {
+		fmt.Printf("index=%d, val=%c \n", index, val)//index=0, val=a
+	}
+}
+```
+
+如果我们的字符串含有中文，那么传统的遍历字符串方式，就是错误，会出现乱码。原因是传统的对字符串的遍历是按照字节来遍历，而一个汉字在utf 8 编码是对应 **3** 个字节。需要要将 str 转成 `[]rune`切片
+
+```go
+package main
+import (
+	"fmt"
+)
+func main(){
+	//字符串遍历方式1-传统方式
+	var str string = "hello,world!北京"
+	str2 := []rune(str) // 就是把 str 转成 []rune
+	for i := 0; i < len(str2); i++ {
+		fmt.Printf("%c \n", str2[i]) //使用到下标...
+	}
+}
+```
+
+对应for-range遍历方式而言，是按照字符方式遍历。因此如果有字符串有中文，也是ok
+
+
+
+### 5.6 while
+
+***Go语言没有while和do…while语法***，如果我们需要使用类似其它语言(比如 java/c 的 while 和 do…while)，可以通过 for 循环来实现其使用效果。
+
+**while循环的实现**
+
+```go
+循环变量初始化
+for{
+    if循环条件表达式{
+        break//跳出for循环
+    }
+    循环操作语句
+    循环变量迭代
+}
+```
+
+举例
+
+```go
+package main
+import "fmt"
+
+func main(){
+	//使用while方式输出10句 "hello,world"
+	//循环变量初始化
+	var i int = 1
+	for {
+		if i > 10 { //循环条件
+			break // 跳出for循环,结束for循环
+		}
+		fmt.Println("hello,world", i)
+		i++ //循环变量的迭代
+	}
+	fmt.Println("i=", i)
+}
+```
+
+**do…while的实现**
+
+```go
+循环变量初始化
+for{
+    循环操作语句
+    循环变量迭代
+    if循环条件表达式{
+        break//跳出for循环
+    }
+}
+```
+
 
 
 ## 六、函数,包和错误处理
