@@ -2519,6 +2519,30 @@ func main() {
 }
 ```
 
+### 7.7 切片的内存形式
+
+![image-20230215222331372](imag/image-20230215222331372.png)
+
+1 .slice的确是一个引用类型
+
+2 .slice 从底层来说，其实就是一个数据结构(struct结构体)
+
+```go
+type slice struct{
+ ptr *[2]int
+ len int
+ cap int
+}
+```
+
+
+
+### 7.8 切片的使用
+
+### 7.9 切片使用注意事项
+
+### 7.10 string和slice
+
 
 
 ## 八、排序与查找
