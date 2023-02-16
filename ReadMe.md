@@ -2539,6 +2539,57 @@ type slice struct{
 
 ### 7.8 切片的使用
 
+- 第1种方式：定义一个切片，然后让切片去引用一个已经创建好的数组，比如前面就是这样的。
+
+- 第2种方式：通过 make 来创建切片.
+
+基本语法：
+
+```go
+var 切片名 []type = make([]type,len,[cap])
+```
+
+![image-20230216234024844](imag/image-20230216234024844.png)
+
+- 第3种方式：定义一个切片，直接就指定具体数组，使用原理类似make的方式
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	var slice []float64 = make([]float64, 5, 10)
+	slice[1] = 10
+	slice[3] = 20
+	fmt.Println(slice)//[0 10 0 20 0]
+	fmt.Println("slice的size=", len(slice))//slice的size= 5
+	fmt.Println("slice的cap=", cap(slice))//slice的size= 10
+    
+	//第3种方式：定义一个切片，直接就指定具体数组，使用原理类似make的方式
+	var strSlice []string = []string{"tom", "jack", "mary"}
+	fmt.Println("strSlice=", strSlice)//strSlice= [tom jack mary]
+	fmt.Println("strSlice size=", len(strSlice)) //strSlice size= 3
+	fmt.Println("strSlice cap=", cap(strSlice)) //strSlice cap= 3
+}
+```
+
+方式 1 和方式 2 的**区别**:
+
+方式1是直接引用数组，这个数组是事先存在的，程序员是可见的
+
+方式2是通过make来创建切片，make也会创建一个数组，是由切片在底层进行维护，程序员是看不见的。
+
+
+
+
+
+
+
+
+
 ### 7.9 切片使用注意事项
 
 ### 7.10 string和slice
