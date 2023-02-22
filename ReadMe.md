@@ -2494,7 +2494,7 @@ func main() {
 
 ```go
 var 切片名 []类型
-//比如：vara[]int
+//比如：var a []int
 ```
 
 ```go
@@ -2502,9 +2502,8 @@ package main
 import (
 	"fmt"
 )
-
+//演示切片的基本使用
 func main() {
-	//演示切片的基本使用
 	var intArr [5]int = [...]int{1, 22, 33, 66, 99}
 	//声明/定义一个切片
 	//1. slice 就是切片名
