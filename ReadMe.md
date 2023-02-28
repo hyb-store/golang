@@ -533,7 +533,74 @@ func main() {
 }
 ```
 
+### 4.4 进制
 
+```go
+package main
+import (
+	"fmt" 
+)
+
+func main() {
+	var i int = 5
+	//二进制输出 
+	fmt.Printf("%b \n", i)//101
+
+	//八进制：0-7 ，满8进1. 以数字0开头表示
+	var j int = 011 // 011=> 9
+	fmt.Println("j=", j)//j= 9
+
+	//0-9及A-F，满16进1. 以0x或0X开头表示
+	var k int = 0x11 // 0x11=> 16 + 1 = 17
+	fmt.Println("k=", k)//k= 17
+}
+```
+
+### 4.5 位运算
+
+#### 4.5.1 原码,反码,补码
+
+#### 4.5.2 位运算
+
+按位与&: 两位全为1,结果为1,否则为0
+按位或|: 两位有一个为1,结果为1,否则为0
+按位异或^: 两位一个为0,一个为1,结果为1,否则为0
+
+```go
+package main
+import (
+	"fmt" 
+)
+func main() {
+
+	//位运算的演示
+    //2 的补码  0000 0010
+    //3 的补码  0000 0011
+    //2&3      0000 0010  => 2
+	fmt.Println(2&3) // 2
+    //2 的补码  0000 0010
+    //3 的补码  0000 0011
+    //2|3            0000 0011 => 3
+	fmt.Println(2|3) // 3
+    //2 的补码  0000 0010
+    3 的补码  0000 0011
+    2^3            0000 0001 =>1
+	fmt.Println(2^3) // 3
+    //-2 的原码  1000 0010 =》反码 1111 1101 => 补码  1111 1110   
+    //2 的补码   0000 0010
+    //-2^2      1111 1100  （补码） ===》 原码
+    //1111 1100  =》 反码   1111 1011 =》 原码  1000 0100 ==》 -4
+	fmt.Println(-2^2) //-4
+
+	a := 1 >> 2 //0
+	c := 1 << 2 //4
+	fmt.Println("a=", a, "c=", c)
+	
+}
+```
+
+右移运算符>>: 低位溢出，符号位不变并用符号位补溢出的高位
+左移运算符<<: 符号位不变，低位补0
 
 ## 五、程序流程控制
 
@@ -931,6 +998,10 @@ import (
 )
 func main(){
 	//字符串遍历方式1-传统方式
+    //var str string = "hello,world!北京"
+	//for i := 0; i < len(str); i++ {
+    //	fmt.Printf("%c ", str[i]) //出现乱码:h e l l o , w o r l d ! å 
+	//}
 	var str string = "hello,world!北京"
 	str2 := []rune(str) // 就是把 str 转成 []rune
 	for i := 0; i < len(str2); i++ {
@@ -3968,4 +4039,6 @@ func main() {
 
 ## 参考
 
-[](https://blog.csdn.net/zhaicheng55/article/details/127978156)
+[go语言基础精修](https://blog.csdn.net/zhaicheng55/article/details/127978156)
+
+[Go语言学习笔记gitee](https://gitee.com/linghuoya/go-language-learning-notes)
