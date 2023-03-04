@@ -2762,6 +2762,49 @@ func main() {
 
 数据量过大，无法全部加载到内存中，需要借助外部存储进行排序。包括（**合并排序法**和**直接合并排序法**）
 
+- 冒泡排序实现：
+
+```go
+package main
+import (
+	"fmt"
+)
+
+//冒泡排序
+func BubbleSort(arr *[5]int) {
+
+	fmt.Println("排序前arr=", (*arr))//排序前arr= [24 69 80 57 13]
+	temp := 0 //临时变量(用于做交换)
+
+	//冒泡排序,一步一步推导出来的
+	for i :=0; i < len(*arr) - 1; i++ {
+		
+		for j := 0; j < len(*arr) - 1 - i; j++ {
+			if (*arr)[j] > (*arr)[j + 1] {
+				//交换
+				temp = (*arr)[j]
+				(*arr)[j] = (*arr)[j + 1]
+				(*arr)[j + 1] = temp
+			}
+		}
+
+	}
+
+	fmt.Println("排序后arr=", (*arr))//排序后arr= [13 24 57 69 80]
+
+}
+
+func main() {
+
+	//定义数组
+	arr := [5]int{24,69,80,57,13}
+	//将数组传递给一个函数，完成排序
+	BubbleSort(&arr)
+
+	fmt.Println("main arr=", arr) //main arr= [13 24 57 69 80]
+}
+```
+
 
 
 ### 8.2 查找
@@ -2770,9 +2813,67 @@ func main() {
 
 （2）二分查找(该数组是有序)
 
-### 8.3
+- 二分查找实现
 
-### 8.4
+```go
+package main
+import (
+	"fmt"
+)
+
+//二分查找的函数
+/*
+二分查找的思路: 比如我们要查找的数是 findVal
+1. arr是一个有序数组，并且是从小到大排序
+2.  先找到 中间的下标 middle = (leftIndex + rightIndex) / 2, 然后让 中间下标的值和findVal进行比较
+2.1 如果 arr[middle] > findVal ,  就应该向  leftIndex ---- (middle - 1)
+2.2 如果 arr[middle] < findVal ,  就应该向  middel+1---- rightIndex
+2.3 如果 arr[middle] == findVal ， 就找到
+2.4 上面的2.1 2.2 2.3 的逻辑会递归执行
+3. 想一下，怎么样的情况下，就说明找不到[分析出退出递归的条件!!]
+if  leftIndex > rightIndex {
+   // 找不到..
+   return ..
+}
+*/
+func BinaryFind(arr *[6]int, leftIndex int, rightIndex int, findVal int) {
+
+	//判断leftIndex 是否大于 rightIndex
+	if leftIndex > rightIndex {
+		fmt.Println("找不到")
+		return
+	}
+
+	//先找到 中间的下标
+	middle := (leftIndex + rightIndex) / 2
+
+	if (*arr)[middle] > findVal {
+		//说明我们要查找的数，应该在  leftIndex --- middel-1
+		BinaryFind(arr, leftIndex, middle - 1, findVal)
+	} else if (*arr)[middle] < findVal {
+		//说明我们要查找的数，应该在  middel+1 --- rightIndex
+		BinaryFind(arr, middle + 1, rightIndex, findVal)
+	} else {
+		//找到了
+		fmt.Printf("找到了，下标为%v \n", middle)
+	}
+}
+
+func main() {
+	arr := [6]int{1, 8, 10, 89, 1000, 1234}
+
+	BinaryFind(&arr, 0, len(arr) - 1, -6)//找不到
+
+}
+```
+
+
+
+### 8.3 多维数组
+
+
+
+### 8.4 二维数组遍历
 
 ## 九、map
 
