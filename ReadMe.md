@@ -1067,6 +1067,49 @@ for{
 
 
 
+### 5.7 goto
+
+（1）Go语言的goto 语句可以无条件地转移到程序中指定的行。
+
+（2）goto语句通常与条件语句配合使用。可用来实现条件转移，跳出循环体等功能。
+
+（3）在Go程序设计中一般不主张使用goto语句，以免造成程序流程的混乱，使理解和调试程序都产生困难
+
+语法：
+
+```go
+goto label
+...
+label:statement
+```
+
+实现：
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	var n int = 30
+	fmt.Println("ok1")
+	if n > 20 {
+		goto label1
+	}
+	fmt.Println("ok2")
+
+label1:
+	fmt.Println("ok3")
+}
+//----result-----
+ok1
+ok3
+```
+
+
+
 ## 六、函数,包和错误处理
 
 ### 6.1 函数概念
@@ -2870,6 +2913,56 @@ func main() {
 
 
 ### 8.3 多维数组
+
+- 语法:var 数组名 大小类型
+
+- 比如:var arr[ 2 ][ 3 ]int ， 再赋值。
+
+- 二维数组在内存的存在形式
+
+  ```go
+  package main
+  import (
+  	"fmt"
+  )
+  
+  func main() {
+  
+  	var arr2 [2][3]int //以这个为例来分析arr2在内存的布局!!
+  	arr2[1][1] = 10
+  	fmt.Println(arr2)
+  
+  	fmt.Printf("arr2[0]的地址%p\n", &arr2[0])
+  	fmt.Printf("arr2[1]的地址%p\n", &arr2[1])
+  
+  	fmt.Printf("arr2[0][0]的地址%p\n", &arr2[0][0])
+  	fmt.Printf("arr2[1][0]的地址%p\n", &arr2[1][0])
+  }
+  ```
+
+  
+
+  ![image-20230305203041660](imag/image-20230305203041660.png)
+
+- 初始化：
+
+  > var 数组名 [大小][大小]类型 =[大小][大小]类型{{初值},{初值}}
+
+- 示例
+
+  ```go
+  package main
+  import (
+  	"fmt"
+  )
+  
+  func main() {	
+  	arr3  := [2][3]int{{1,2,3}, {4,5,6}}
+  	fmt.Println("arr3=", arr3)
+  }
+  ```
+
+  
 
 
 
