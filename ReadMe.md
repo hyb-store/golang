@@ -2916,37 +2916,44 @@ func main() {
 
 - 语法:var 数组名 大小类型
 
-- 比如:var arr[ 2 ][ 3 ]int ， 再赋值。
+- 比如:`var arr[2][3]int` ， 再赋值。
 
 - 二维数组在内存的存在形式
 
   ```go
   package main
+  
   import (
   	"fmt"
   )
   
   func main() {
-  
-  	var arr2 [2][3]int //以这个为例来分析arr2在内存的布局!!
+  	var arr2 [2][3]int //分析arr2在内存的布局!!
   	arr2[1][1] = 10
   	fmt.Println(arr2)
   
-  	fmt.Printf("arr2[0]的地址%p\n", &arr2[0])
-  	fmt.Printf("arr2[1]的地址%p\n", &arr2[1])
-  
-  	fmt.Printf("arr2[0][0]的地址%p\n", &arr2[0][0])
-  	fmt.Printf("arr2[1][0]的地址%p\n", &arr2[1][0])
+  	fmt.Printf("arr2[0]的地址%p\n", &arr2[0])//arr2[0]的地址0xc00000a420
+  	fmt.Printf("arr2[1]的地址%p\n", &arr2[1])//arr2[1]的地址0xc00000a438
+  	//16进制
+  	fmt.Printf("arr2[0][0]的地址%p\n", &arr2[0][0])//0xc00000a420
+  	fmt.Printf("arr2[0][1]的地址%p\n", &arr2[0][1])//0xc00000a428
+  	fmt.Printf("arr2[0][2]的地址%p\n", &arr2[0][2])//0xc00000a430
+  	fmt.Printf("arr2[1][0]的地址%p\n", &arr2[1][0])//0xc00000a438
+  	fmt.Printf("arr2[1][1]的地址%p\n", &arr2[1][1])//0xc00000a440
+  	fmt.Printf("arr2[1][2]的地址%p\n", &arr2[1][2])//0xc00000a448
+      
+      fmt.Println()
+  	arr3 := [2][3]int{{1, 2, 3}, {4, 5, 6}}
+  	fmt.Println("arr3=", arr3)//arr3= [[1 2 3] [4 5 6]]
   }
+  
   ```
 
-  
-
-  ![image-20230305203041660](imag/image-20230305203041660.png)
+  ![image-20230307230922238](imag/image-20230307230922238.png)
 
 - 初始化：
 
-  > var 数组名 [大小][大小]类型 =[大小][大小]类型{{初值},{初值}}
+  > `var 数组名 [大小][大小]类型 =[大小][大小]类型{{初值},{初值}}`
 
 - 示例
 
@@ -2962,11 +2969,52 @@ func main() {
   }
   ```
 
-  
+- 二维数组在声明/定义时也对应有四种写法
+
+  ```go
+  var 数组名 [大小][大小]类型 =[大小][大小]类型 { { 初值 },{ 初值 } }
+  var 数组名 [大小][大小]类型 =[...][大小]类型{{初值},{初值}}
+  var 数组名 = [大小][大小]类型{{初值},{初值}}
+  var 数组名 = [...][大小]类型{{初值},{初值}}
+  ```
 
 
 
 ### 8.4 二维数组遍历
+
+- 双层for循环完成遍历
+- for-range方式完成遍历
+
+```go
+package main
+import (
+	"fmt"
+)
+
+func main() {
+
+	//演示二维数组的遍历
+	var arr3  = [2][3]int{{1,2,3}, {4,5,6}}
+
+	//for循环来遍历
+	for i := 0; i < len(arr3); i++ {
+		for j := 0; j < len(arr3[i]); j++ {
+			fmt.Printf("%v\t", arr3[i][j])//1	2	3
+		}
+		fmt.Println()
+	}
+
+	//for-range来遍历二维数组
+	for i, v := range arr3 {
+		for j, v2 := range v {
+			fmt.Printf("arr3[%v][%v]=%v \t",i, j, v2)//arr3[0][0]=1    arr3[0][1]=2    arr3[0][2]=3 
+		}
+		fmt.Println()	
+	}
+}
+```
+
+
 
 ## 九、map
 
