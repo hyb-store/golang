@@ -3072,7 +3072,7 @@ func main() {
 
 ![image-20221229151531480](imag/image-20221229151531480.png)
 
-## 9.3 map的使用
+### 9.3 map的使用
 
 方式 1
 
@@ -3087,12 +3087,11 @@ func main() {
 	var a map[string]string
 	//在使用map前，需要先make , make的作用就是给map分配数据空间
 	a = make(map[string]string, 10)
-	a["no1"] = "宋江" //ok?
-	a["no2"] = "吴用" //ok?
-	a["no1"] = "武松" //ok?
-	a["no3"] = "吴用" //ok?
+	a["no1"] = "宋江" 
+	a["no2"] = "吴用" 
+	a["no1"] = "武松" 
+	a["no3"] = "吴用" 
 	fmt.Println(a)
-
 }
 ```
 
@@ -3134,7 +3133,7 @@ func main() {
 }
 ```
 
-9.4 map操作
+### 9.4 map操作
 
 - map增改
 
@@ -3267,7 +3266,6 @@ func main() {
          k2=name v2=tom           
          k2=sex v2=男             
          k2=address v2=北京长安街~
-
     */
 	for k1, v1 := range studentmap {
 		fmt.Println("k1=", k1)
@@ -3280,6 +3278,16 @@ func main() {
 ```
 
 
+
+### 9.5 map切片
+
+**切片的数据类型如果是 map** ，则我们称为 sliceofmap， **map 切片**，这样使用则 map 个数就可以动态变化了
+
+
+
+### 9.6 map排序
+
+### 9.7 map使用细节
 
 ## 十、面向对象编程
 
